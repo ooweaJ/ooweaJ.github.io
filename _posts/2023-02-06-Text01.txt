@@ -9,7 +9,7 @@ tags: [BP]
 중요 클래스 구조 설명  <br>
 
 Default Character <br>
-![image]("D:/unreal/ooweaJ.github.io/assets/image/캐릭터구조.PNG") <br>
+![Image](https://user-images.githubusercontent.com/121000013/218499126-70094962-e989-48ff-a35e-b47cbbf5b41d.PNG) <br>
 Player <br>
 Enemy <br>
 <br>
