@@ -5,8 +5,11 @@ categories: [UE4 포트폴리오(BP), 목차]
 tags: [BP]
 ---
    
-목차  <br>
-중요 클래스 구조 설명  <br>
+# - 목차 - 
+## 중요 클래스 구조 설명   
+## Player   
+## Weapon  
+## AI  
 
 Default Character <br>
 ![Image](https://user-images.githubusercontent.com/121000013/219037126-479108a8-711e-4175-b8be-9cf81efbcb9e.PNG)<br>
@@ -26,7 +29,7 @@ Combat 아이템을 장착하면 캐릭터의 Status의 값이 반영된다. <br
 버리고 다시 먹기도 가능하다. <br>
 <br>
 <br>
-![Image](https://user-images.githubusercontent.com/121000013/218500269-c9413f0f-d5fc-4f1b-a2c8-4444520e6cb7.PNG) <br>
+![Image](https://user-images.githubusercontent.com/121000013/219045119-22fbf754-2e50-48f2-b6c3-bdfa061718ac.PNG) <br>
 ![Image](https://user-images.githubusercontent.com/121000013/218485334-2c3fac89-1230-4bda-89ef-df4957876d72.PNG) <br>
 Playe 입력 방식으로는 커맨드식으로  Queue를 비슷하게 만들었다. <br>
 들어온 커맨드를 배열에 저장하여 앞에의 두개의 입력을 확인하여 Enum값으로 저장하고 배열을 0.3초 후 초기화 시키는 타이머를 만들었다. <br>
