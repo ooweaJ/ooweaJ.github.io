@@ -66,7 +66,7 @@ Return은 고유한 자리를 벗어나지않게 다시 돌아간다. <br>
 <iframe width="800" height="450" src="https://www.youtube.com/watch?v=XHF6sYezLpY&list=PLALFxu-91BI-l2uEO2tuPQIBTthDU0-GR&index=2" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 <br>
 <br>
-"D:\unreal\ooweaJ.github.io\assets\image\EQS.PNG" <br>
+![Image](https://user-images.githubusercontent.com/121000013/219044177-f9143bd1-c7ea-4199-9522-e4bc23b50b3b.PNG) <br>
 RunAway는 피가 20%이하가 되면 EQS를 돌려 Enemy에서 Player 방향과  Enemy와 Item 방향으로 내적하여 <br>
 나온 값의 Inverse Linear로 점수를 먹여 최적의 방향을 정해준다. (Scoring Factor 2로 설정하여 제일 높은 점수) <br>
 플레이와 거리가 가장 먼 곳  (Scoring Factor 1 제일 낮은 점수) <br> 
