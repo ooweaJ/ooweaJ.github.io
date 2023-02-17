@@ -4,12 +4,6 @@ data: 2023-02-06 10:00:00 +0900
 categories: [UE4 포트폴리오(BP), 목차]
 tags: [BP]
 ---
-   
- - 목차 - 
-중요 클래스 구조 설명   
-Player   
-Weapon  
-AI  
 
 Default Character <br>
 ![Image](https://user-images.githubusercontent.com/121000013/219037126-479108a8-711e-4175-b8be-9cf81efbcb9e.PNG)<br>
