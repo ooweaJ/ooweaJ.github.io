@@ -5,8 +5,6 @@ categories: [UE4 포트폴리오(BP), 목차]
 tags: [BP]
 ---
 
-<iframe width="800" height="450" src="https://www.youtube.com/embed/ootsdKeNCvk" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
 Default Character <br>
 ![Image](https://user-images.githubusercontent.com/121000013/219037126-479108a8-711e-4175-b8be-9cf81efbcb9e.PNG)<br>
 
@@ -16,7 +14,7 @@ Item <br>
 <br>
 <br>
 Player <br>
-<iframe width="800" height="450" src="https://www.youtube.com/embed/-iEfP_cbfQw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="800" height="450" src="https://www.youtube.com/embed/_TWT7ePJDbI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 <br>
 캐릭터의 애니메이션은 애님 에셋 리타깃을 이용하였고 <br>
 아이템들을 파밍하여 인벤토리에 보관이 가능하다. <br>
