@@ -1,8 +1,8 @@
 ---
 title: "[BP]PortFolio"
 data: 2023-02-06 10:00:00 +0900
-categories: [UE4 포트폴리오(BP), 목차]
-tags: [BP]
+categories: "[UE4 포트폴리오(BP), 목차]"
+tags: "[BP]"
 ---
 
 Default Character <br>
