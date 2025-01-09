@@ -1,10 +1,10 @@
 ---
-title: EclipsedCity 개발일지
+title: 언리얼 모션매칭
 date: 2024-11-27 14:00:00 +09:00
-categories: [언리얼,EclipsedCity]
+categories: [언리얼, 모션매칭]
 tags:
   [
-    언리얼,
+    언리얼, 모션매칭
   ]
 ---
 # **개발일지를 작성하게된 이유**
