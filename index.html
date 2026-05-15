@@ -206,10 +206,10 @@
 
 
   <!-- HERO — 이름 / 한 줄 소개 + 기술 스택 -->
-  <section id="intro" class="min-h-[calc(100vh-65px)] flex flex-col justify-center py-20">
+  <section id="intro" class="min-h-[calc(100vh-65px)] flex flex-col justify-between pt-16 pb-12">
 
     <!-- 상단: 이름 + 한 줄 소개 -->
-    <div class="mb-16">
+    <div>
       <h1 class="serif font-light leading-[0.95] mb-6" style="font-size: 112px; letter-spacing: -0.03em;">
         Yu<br>
         <span>Jaewoo<span style="color: var(--accent);">.</span></span>
@@ -219,54 +219,67 @@
         Game &amp; XR Developer.
       </p>
 
-      <p class="text-xl leading-[1.55] max-w-[560px] ph">
-        [ 한 줄 자기소개 ]
+      <p class="text-xl leading-[1.55] max-w-[560px]" style="color: var(--text-2);">
+        현실과 가상의 경계에서 — 플레이어가 잊지 못할 경험을 만듭니다.
       </p>
     </div>
 
-    <!-- 하단: 기술 스택 + 이메일 -->
-    <div class="flex items-end justify-between border-t rule pt-10">
-
-      <div class="flex gap-12">
+    <!-- 하단: 기술 스택 -->
+    <div class="border-t rule pt-10">
+      <div class="flex gap-3 mb-6">
+        <span class="label" style="color: var(--accent); letter-spacing: 0.15em;">Core</span>
+        <span class="label">/ 주력</span>
+      </div>
+      <div class="flex gap-12 mb-10">
         <div>
           <div class="label mb-3">Game Engine</div>
           <div class="flex flex-wrap gap-2">
-            <span class="tag tag-ph">[ Unity ]</span>
-            <span class="tag tag-ph">[ Unreal ]</span>
+            <span class="tag tag-default">Unreal Engine 5</span>
+            <span class="tag tag-default">Unity</span>
           </div>
         </div>
         <div>
           <div class="label mb-3">Language</div>
           <div class="flex flex-wrap gap-2">
-            <span class="tag tag-ph">[ C# ]</span>
-            <span class="tag tag-ph">[ C++ ]</span>
-            <span class="tag tag-ph">[ ... ]</span>
+            <span class="tag tag-default">C++</span>
+            <span class="tag tag-default">C#</span>
           </div>
         </div>
         <div>
           <div class="label mb-3">XR</div>
           <div class="flex flex-wrap gap-2">
-            <span class="tag tag-ph">[ AR ]</span>
-            <span class="tag tag-ph">[ VR ]</span>
-          </div>
-        </div>
-        <div>
-          <div class="label mb-3">Tools</div>
-          <div class="flex flex-wrap gap-2">
-            <span class="tag tag-ph">[ Git ]</span>
-            <span class="tag tag-ph">[ ... ]</span>
+            <span class="tag tag-default">AR</span>
+            <span class="tag tag-default">VR</span>
           </div>
         </div>
       </div>
 
-      <a href="mailto:yu.jaewoo@gmail.com"
-         class="inline-flex items-center gap-3 text-base font-semibold flex-shrink-0"
-         style="color: var(--accent);">
-        yu.jaewoo@gmail.com
-        <svg width="16" height="16"><use href="#i-arr"/></svg>
-      </a>
-
+      <div class="flex gap-3 mb-6">
+        <span class="label" style="letter-spacing: 0.15em;">Experienced</span>
+        <span class="label">/ 경험</span>
+      </div>
+      <div class="flex gap-12">
+        <div>
+          <div class="label mb-3">Backend / Server</div>
+          <div class="flex flex-wrap gap-2">
+            <span class="tag tag-ph">Node.js</span>
+            <span class="tag tag-ph">MySQL</span>
+            <span class="tag tag-ph">Redis</span>
+            <span class="tag tag-ph">Nginx</span>
+          </div>
+        </div>
+        <div>
+          <div class="label mb-3">DevOps / Infra</div>
+          <div class="flex flex-wrap gap-2">
+            <span class="tag tag-ph">AWS</span>
+            <span class="tag tag-ph">Docker</span>
+            <span class="tag tag-ph">Kubernetes</span>
+            <span class="tag tag-ph">Proxmox</span>
+          </div>
+        </div>
+      </div>
     </div>
+
   </section>
 
 
