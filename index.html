@@ -121,6 +121,11 @@
     color: var(--text-2);
     background: var(--surface-2);
   }
+  .tag-ai {
+    border: 1px solid rgba(91, 141, 239, 0.38);
+    color: #5b8def;
+    background: rgba(91, 141, 239, 0.1);
+  }
   .tag-ph {
     border: 1px dashed var(--border-2);
     color: var(--ph);
@@ -181,24 +186,21 @@
     width: 100%; height: 100%; object-fit: cover;
     z-index: 1;
   }
-  .thumb .play-btn { z-index: 2; }
-  .thumb:hover { border-color: var(--accent); }
-  .thumb:hover .play-btn {
-    background: var(--accent);
-    color: var(--surface);
-    border-color: var(--accent);
-    transform: scale(1.05);
+  .featured-thumb {
+    min-height: 320px;
+    aspect-ratio: auto;
   }
-  .play-btn {
+  .grid-thumb {
+    aspect-ratio: 16 / 9;
+  }
+  .thumb-placeholder {
     position: relative;
-    width: 48px; height: 48px;
-    border-radius: 50%;
-    border: 1.5px solid var(--text-3);
+    z-index: 1;
     color: var(--text-3);
-    display: flex; align-items: center; justify-content: center;
-    transition: all 240ms ease;
-    background: var(--surface);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
   }
+  .thumb:hover { border-color: var(--accent); }
 
   .link-pill {
     display: inline-flex; align-items: center; gap: 6px;
@@ -237,6 +239,7 @@
     font-size: 13px;
     font-weight: 700;
     line-height: 1;
+    cursor: pointer;
     transition: border-color 200ms ease, color 200ms ease, background-color 200ms ease, transform 200ms ease;
   }
   .project-action:hover {
@@ -254,6 +257,121 @@
     border-color: var(--accent-bd);
     background: var(--accent-soft);
     color: var(--accent);
+  }
+  button.project-action {
+    appearance: none;
+  }
+
+  .ai-panel {
+    max-width: 920px;
+    padding: 0;
+  }
+  .ai-panel-head {
+    padding: 30px 34px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ai-panel-kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .ai-panel-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  .ai-panel-title {
+    margin: 0;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 34px;
+    font-weight: 300;
+    line-height: 1.22;
+  }
+  .ai-panel-subtitle {
+    margin: 10px 0 0;
+    color: var(--text-2);
+    line-height: 1.7;
+  }
+  .ai-panel-body {
+    display: grid;
+    gap: 16px;
+    padding: 24px 28px 28px;
+  }
+  .ai-case {
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    padding: 20px;
+  }
+  .ai-case-title {
+    margin: 0 0 14px;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text);
+  }
+  .ai-case-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .ai-case-item {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 14px;
+  }
+  .ai-case-label {
+    display: block;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .ai-case-text {
+    margin: 0;
+    color: var(--text-2);
+    font-size: 13.5px;
+    line-height: 1.65;
+  }
+  .ai-panel-takeaway-wrap {
+    border: 1px solid var(--accent-bd);
+    background: var(--accent-soft);
+    padding: 18px 20px;
+  }
+  .ai-panel-takeaway-wrap h4 {
+    margin: 0 0 8px;
+    font-size: 15px;
+    color: var(--text);
+  }
+  .ai-panel-takeaway {
+    margin: 0;
+    color: var(--text-2);
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  @media (max-width: 1180px) {
+    #grid-list { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  }
+
+  @media (max-width: 900px) {
+    .featured-card {
+      display: flex !important;
+      flex-direction: column;
+    }
+    .featured-thumb {
+      min-height: 220px;
+      aspect-ratio: 16 / 9;
+      border-right: none !important;
+      border-bottom: 1px solid var(--border) !important;
+      border-radius: 3px 3px 0 0 !important;
+    }
+    #grid-list { grid-template-columns: 1fr !important; }
+    .ai-case-grid { grid-template-columns: 1fr; }
   }
 
   a { transition: color 200ms ease; }
@@ -519,7 +637,6 @@
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <symbol id="i-play" viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20" fill="currentColor"/></symbol>
     <symbol id="i-youtube" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31.4 31.4 0 0 0 0 12a31.4 31.4 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31.4 31.4 0 0 0 24 12a31.4 31.4 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></symbol>
     <symbol id="i-doc"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></symbol>
     <symbol id="i-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></symbol>
@@ -700,6 +817,28 @@
 
 </div>
 
+<div id="ai-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="ai-modal-title">
+  <section class="modal ai-panel">
+    <div class="ai-panel-head">
+      <div class="ai-panel-kicker">AI Collaboration</div>
+      <div class="ai-panel-title-row">
+        <div>
+          <h3 id="ai-modal-title" class="ai-panel-title"></h3>
+          <p id="ai-modal-summary" class="ai-panel-subtitle"></p>
+        </div>
+        <button type="button" id="ai-modal-close" class="modal-close" aria-label="닫기">×</button>
+      </div>
+    </div>
+    <div class="ai-panel-body">
+      <div id="ai-modal-cases"></div>
+      <section class="ai-panel-takeaway-wrap">
+        <h4>정리</h4>
+        <p id="ai-modal-takeaway" class="ai-panel-takeaway"></p>
+      </section>
+    </div>
+  </section>
+</div>
+
 <script src="projects.js"></script>
 <script>
 /* ============================================================
@@ -738,10 +877,10 @@ function isSafeUrl(u) {
   const value = String(u).trim();
   if (!value || /[\u0000-\u001F\u007F]/.test(value)) return false;
   if (/^(javascript|data|vbscript):/i.test(value)) return false;
-  const isRelativeAsset = /^(?:\.\/)?assets\//i.test(value);
+  const isRelativeLocal = /^(?:\.\/)?(?:assets|docs)\//i.test(value);
   try {
     const parsed = new URL(value, location.href);
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:' || parsed.protocol === 'mailto:' || (parsed.protocol === 'file:' && isRelativeAsset);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:' || parsed.protocol === 'mailto:' || (parsed.protocol === 'file:' && isRelativeLocal);
   } catch { return false; }
 }
 
@@ -749,18 +888,17 @@ function isSafeUrl(u) {
 /* ============================================================
    Rendering
    ============================================================ */
-function thumbHtml(p, big) {
-  const playSize = big ? 18 : 14;
+function thumbHtml(p) {
   if (p.thumbnail && isSafeUrl(p.thumbnail)) {
-    return `<img class="thumb-img" src="${escapeHtml(p.thumbnail)}" alt="${escapeHtml(p.name)}" onerror="this.remove()">
-            <div class="play-btn"><svg width="${playSize}" height="${playSize}"><use href="#i-play"/></svg></div>`;
+    return `<img class="thumb-img" src="${escapeHtml(p.thumbnail)}" alt="${escapeHtml(p.name)}" onerror="this.remove()">`;
   }
-  return `<div class="play-btn"><svg width="${playSize}" height="${playSize}"><use href="#i-play"/></svg></div>`;
+  return `<span class="thumb-placeholder">NO IMAGE</span>`;
 }
 
 function tagsHtml(p) {
   const tags = [];
   if (p.hasAward) tags.push(`<span class="tag tag-accent">★ ${escapeHtml(p.award || '수상')}</span>`);
+  if (p.aiCollab) tags.push(`<span class="tag tag-ai">AI 협업</span>`);
   if (p.hasHost)  tags.push(`<span class="tag tag-default">${escapeHtml(p.host || '주최')}</span>`);
   if (p.category) tags.push(`<span class="tag tag-default">${escapeHtml(p.category)}</span>`);
   return tags.join('');
@@ -776,6 +914,7 @@ function linksHtml(p) {
   const items = [];
   if (isSafeUrl(p.video))  items.push(`<a href="${escapeHtml(p.video)}"  target="_blank" rel="noopener" class="project-action project-action-primary"><svg><use href="#i-youtube"/></svg> 플레이 영상</a>`);
   if (isSafeUrl(p.docs))   items.push(`<a href="${escapeHtml(p.docs)}"   target="_blank" rel="noopener" class="project-action"><svg><use href="#i-doc"/></svg> 기술문서</a>`);
+  if (p.aiCollab) items.push(`<button type="button" class="project-action" data-ai-id="${escapeHtml(p.id)}"><svg><use href="#i-code"/></svg> AI 협업</button>`);
   if (isSafeUrl(p.devlog || p.notion)) items.push(`<a href="${escapeHtml(p.devlog || p.notion)}" target="_blank" rel="noopener" class="project-action"><svg><use href="#i-notion"/></svg> 개발일지</a>`);
   if (isSafeUrl(p.github)) items.push(`<a href="${escapeHtml(p.github)}" target="_blank" rel="noopener" class="project-action"><svg><use href="#i-github"/></svg> GitHub</a>`);
   return items.length ? `<div class="project-actions">${items.join('')}</div>` : '';
@@ -784,7 +923,10 @@ function linksHtml(p) {
 function renderFeatured(p) {
   return `
     <article class="featured-card mb-6 grid grid-cols-12 gap-0" data-id="${escapeHtml(p.id)}">
-      <div class="col-span-7 p-9">
+      <div class="col-span-5 thumb featured-thumb" style="border-radius: 3px 0 0 3px; border: none; border-right: 1px solid var(--border);">
+        ${thumbHtml(p)}
+      </div>
+      <div class="col-span-7 p-8">
         <div class="flex flex-wrap gap-2 mb-5">${tagsHtml(p) || ''}</div>
         <h3 class="serif font-light leading-[1.05] mb-4" style="font-size: 44px; letter-spacing: -0.025em;">
           ${escapeHtml(p.name)}
@@ -794,17 +936,14 @@ function renderFeatured(p) {
         ${linksHtml(p)}
         <div class="flex flex-wrap gap-1.5">${techHtml(p)}</div>
       </div>
-      <div class="col-span-5 thumb" style="border-radius: 0 3px 0 0; border: none; border-left: 1px solid var(--border);">
-        ${thumbHtml(p, true)}
-      </div>
     </article>`;
 }
 
 function renderGridCard(p) {
   return `
     <article class="card flex flex-col overflow-hidden" data-id="${escapeHtml(p.id)}">
-      <div class="thumb" style="border-radius: 2px 2px 0 0; border: none; border-bottom: 1px solid var(--border);">
-        ${thumbHtml(p, false)}
+      <div class="thumb grid-thumb" style="border-radius: 2px 2px 0 0; border: none; border-bottom: 1px solid var(--border);">
+        ${thumbHtml(p)}
       </div>
       <div class="p-5 flex flex-col flex-1">
         <div class="flex flex-wrap gap-1.5 mb-3">${tagsHtml(p)}</div>
@@ -825,6 +964,60 @@ function render() {
 
 
 render();
+
+function aiCaseHtml(aiCase) {
+  return `
+    <section class="ai-case">
+      <h4 class="ai-case-title">${escapeHtml(aiCase.title)}</h4>
+      <div class="ai-case-grid">
+        <div class="ai-case-item">
+          <span class="ai-case-label">Problem</span>
+          <p class="ai-case-text">${escapeHtml(aiCase.problem)}</p>
+        </div>
+        <div class="ai-case-item">
+          <span class="ai-case-label">AI Use</span>
+          <p class="ai-case-text">${escapeHtml(aiCase.aiUse)}</p>
+        </div>
+        <div class="ai-case-item">
+          <span class="ai-case-label">My Control</span>
+          <p class="ai-case-text">${escapeHtml(aiCase.control)}</p>
+        </div>
+        <div class="ai-case-item">
+          <span class="ai-case-label">Result</span>
+          <p class="ai-case-text">${escapeHtml(aiCase.result)}</p>
+        </div>
+      </div>
+    </section>`;
+}
+
+function openAiPanel(projectId) {
+  const project = PROJECTS.find(p => p.id === projectId);
+  if (!project || !project.aiCollab) return;
+
+  document.getElementById('ai-modal-title').textContent = project.aiCollab.title || `${project.name} AI 협업`;
+  document.getElementById('ai-modal-summary').textContent = project.aiCollab.summary || '';
+  document.getElementById('ai-modal-cases').innerHTML = (project.aiCollab.cases || []).map(aiCaseHtml).join('');
+  document.getElementById('ai-modal-takeaway').textContent = project.aiCollab.takeaway || '';
+  document.getElementById('ai-modal').classList.add('open');
+}
+
+function closeAiPanel() {
+  document.getElementById('ai-modal').classList.remove('open');
+}
+
+document.addEventListener('click', event => {
+  const aiButton = event.target.closest('[data-ai-id]');
+  if (aiButton) {
+    openAiPanel(aiButton.getAttribute('data-ai-id'));
+    return;
+  }
+  if (event.target.id === 'ai-modal') closeAiPanel();
+});
+
+document.getElementById('ai-modal-close').addEventListener('click', closeAiPanel);
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') closeAiPanel();
+});
 </script>
 
 </body>
