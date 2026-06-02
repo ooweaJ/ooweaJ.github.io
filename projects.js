@@ -21,8 +21,34 @@
      award       : 수상 내역 — 예: '대상'
      hasHost     : true = 주최 태그 표시
      host        : 주최처 — 예: '한국콘텐츠진흥원'
+
+   에셋 경로 규칙:
+     assets/projects/{id}/thumbnail.png
+     assets/projects/{id}/docs/{id}-technical-report.pdf
    ============================================================ */
 const PROJECTS = [
+  {
+    id: 'unity-dedicate',
+    name: 'Rumble Arena',
+    subtitle: 'Server-authoritative Arena Multiplayer',
+    concept: 'Unity Dedicated Server와 Mirror 기반으로 로비/배틀 서버를 분리한 2v2 아레나 PvP 프로젝트입니다.',
+    description: 'Unity Dedicated PvP는 전용 배틀 서버 구조를 직접 설계한 멀티플레이어 아레나 게임입니다.\n\n로비 서버와 배틀 서버를 분리하고, Mirror/KCP 기반 네트워크 흐름 위에서 매치메이킹, 전투 상태머신, 결과 처리, 로비 복귀 흐름을 구성했습니다. 서버는 캐릭터 스탯과 스킬 쿨다운을 재검증하는 Server Authority 구조로 설계해 클라이언트 조작 가능성을 줄였습니다.\n\n전투 시스템은 ScriptableObject 기반 캐릭터/스킬 데이터, 근거리/발사체/돌진 액션, 팀 전멸 또는 타임오버 HP 비율 기반 승패 판정으로 구성했습니다. PC와 모바일 입력은 IPlayerInputProvider 인터페이스로 추상화해 같은 PlayerController가 플랫폼별 입력 구현만 교체해 사용할 수 있도록 만들었습니다.\n\n프로젝트 구조와 기술문서를 교차 확인한 결과, Assets/_dev/Script 아래 Battle, Combat, Server, Player, Inventory, Gacha, Lobby, Login, Shop 영역으로 기능이 분리되어 있습니다.',
+    category: 'Multiplayer / Server',
+    role: 'Network / Gameplay Developer',
+    period: '2026',
+    tech: 'Unity, C#, Mirror, KCP, Dedicated Server, Node.js, MySQL',
+    thumbnail: 'assets/projects/unity-dedicate/thumbnail.png',
+    video: 'https://youtube.com/',
+    docs: 'assets/projects/unity-dedicate/docs/unity-dedicate-technical-report.html',
+    devlog: 'https://www.notion.so/Unity-Dedicated-Server-C-Mirror-2c4dc21508298045b0c0fcc4b95c99aa',
+    github: 'https://github.com/ooweaJ/Unity_Dedicate',
+    featured: true,
+    hasAward: false,
+    award: '',
+    hasHost: false,
+    host: '',
+  },
+
   {
     id: 'vrbeat',
     name: 'VRBeat',
@@ -33,32 +59,11 @@ const PROJECTS = [
     role: 'Solo Developer',
     period: '2026',
     tech: 'Unity 6, C#, OpenXR, XR Interaction Toolkit, URP, Python, JSON',
-    thumbnail: 'assets/vrbeat-thumbnail.png',
-    video: 'https://youtube.com/',
-    docs: 'assets/docs/vrbeat-technical-report.pdf',
-    devlog: 'https://notion.so/',
-    github: 'https://github.com/ooweaJ',
-    featured: true,
-    hasAward: false,
-    award: '',
-    hasHost: false,
-    host: '',
-  },
-  {
-    id: 'unity-dedicate',
-    name: 'Unity Dedicated PvP',
-    subtitle: 'Server-authoritative Arena Multiplayer',
-    concept: 'Unity Dedicated Server와 Mirror 기반으로 로비/배틀 서버를 분리한 2v2 아레나 PvP 프로젝트입니다.',
-    description: 'Unity Dedicated PvP는 전용 배틀 서버 구조를 직접 설계한 멀티플레이어 아레나 게임입니다.\n\n로비 서버와 배틀 서버를 분리하고, Mirror/KCP 기반 네트워크 흐름 위에서 매치메이킹, 전투 상태머신, 결과 처리, 로비 복귀 흐름을 구성했습니다. 서버는 캐릭터 스탯과 스킬 쿨다운을 재검증하는 Server Authority 구조로 설계해 클라이언트 조작 가능성을 줄였습니다.\n\n전투 시스템은 ScriptableObject 기반 캐릭터/스킬 데이터, 근거리/발사체/돌진 액션, 팀 전멸 또는 타임오버 HP 비율 기반 승패 판정으로 구성했습니다. PC와 모바일 입력은 IPlayerInputProvider 인터페이스로 추상화해 같은 PlayerController가 플랫폼별 입력 구현만 교체해 사용할 수 있도록 만들었습니다.\n\n프로젝트 구조와 기술문서를 교차 확인한 결과, Assets/_dev/Script 아래 Battle, Combat, Server, Player, Inventory, Gacha, Lobby, Login, Shop 영역으로 기능이 분리되어 있습니다.',
-    category: 'Multiplayer / Server',
-    role: 'Network / Gameplay Developer',
-    period: '2026',
-    tech: 'Unity, C#, Mirror, KCP, Dedicated Server, Node.js, MySQL',
-    thumbnail: '',
-    video: 'https://youtube.com/',
+    thumbnail: 'assets/projects/vrbeat/thumbnail.png',
+    video: 'https://youtu.be/XdSFuX_5fTw',
     docs: '',
     devlog: '',
-    github: 'https://github.com/ooweaJ',
+    github: 'https://github.com/ooweaJ/VRBeat',
     featured: false,
     hasAward: false,
     award: '',

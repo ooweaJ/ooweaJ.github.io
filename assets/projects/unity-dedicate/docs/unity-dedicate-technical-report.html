@@ -1,0 +1,2301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unity 멀티플레이 아레나 PvP — 기술 문서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface2: #f8f9fa;
+  --border: #e1e4e8;
+  --border2: #d0d7de;
+  --text: #0a0a0a;
+  --text-muted: #444d56;
+  --text-dim: #6a737d;
+  --accent: #6c2bd9;
+  --accent-light: #8b5cf6;
+  --accent-bg: #f5f0ff;
+  --accent-border: #d8b4fe;
+  --green: #047857;
+  --green-light: #059669;
+  --green-bg: #ecfdf5;
+  --green-border: #a7f3d0;
+  --blue: #1d4ed8;
+  --blue-light: #2563eb;
+  --blue-bg: #eff6ff;
+  --blue-border: #bfdbfe;
+  --orange: #c2410c;
+  --orange-light: #ea580c;
+  --orange-bg: #fff7ed;
+  --orange-border: #fed7aa;
+  --radius: 10px;
+  --max-w: 860px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans KR', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+/* ── 네비게이션 ── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  box-shadow: 0 1px 0 var(--border);
+}
+.nav-inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 48px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-inner::-webkit-scrollbar { display: none; }
+.nav-logo {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--accent);
+  white-space: nowrap;
+  margin-right: 8px;
+  padding-right: 12px;
+  border-right: 1px solid var(--border);
+}
+.nav-item {
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-decoration: none;
+  padding: 4px 9px;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+.nav-item:hover { color: var(--accent); background: var(--accent-bg); }
+.nav-item.active { color: var(--accent); background: var(--accent-bg); }
+
+/* ── 히어로 ── */
+.hero {
+  background: linear-gradient(160deg, #1a0533 0%, #0d1117 40%, #0a1628 100%);
+  padding: 72px 24px 64px;
+  text-align: center;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -20%; left: 50%;
+  transform: translateX(-50%);
+  width: 700px; height: 400px;
+  background: radial-gradient(ellipse, rgba(139,92,246,0.2) 0%, transparent 65%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #c4b5fd;
+  background: rgba(139,92,246,0.15);
+  border: 1px solid rgba(139,92,246,0.4);
+  padding: 4px 14px;
+  border-radius: 99px;
+  margin-bottom: 24px;
+}
+.hero h1 {
+  font-size: clamp(30px, 5vw, 52px);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin-bottom: 18px;
+  color: #f8f8ff;
+}
+.hero h1 .accent { color: #c4b5fd; }
+.hero-sub {
+  font-size: clamp(13px, 1.8vw, 16px);
+  color: #94a3b8;
+  max-width: 520px;
+  margin: 0 auto 32px;
+  line-height: 1.7;
+}
+.hero-tags {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+.hero-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  color: #94a3b8;
+  border: 1px solid #334155;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.04);
+}
+.hero-meta {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius);
+  overflow: hidden;
+  text-align: left;
+}
+.hero-meta-item {
+  padding: 14px 20px;
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+.hero-meta-item:last-child { border-right: none; }
+.hero-meta-item .label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #64748b;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+.hero-meta-item .value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+/* ── 섹션 공통 ── */
+.section {
+  padding: 56px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.section:last-child { border-bottom: none; }
+.section > .inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+}
+
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+.section-title {
+  font-size: clamp(20px, 2.8vw, 28px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+  color: var(--text);
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--text);
+}
+
+/* ── 핵심 메시지 ── */
+.lead-box {
+  background: var(--accent-bg);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+.lead-box strong { color: var(--accent); font-weight: 700; }
+.lead-box code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  background: rgba(108,43,217,0.08);
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: var(--accent);
+}
+
+/* ── 다이어그램 ── */
+.diagram-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  box-shadow: var(--shadow);
+}
+.diagram-wrap svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-width: 100%;
+}
+
+/* ── 3단 카드 ── */
+.cards-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+@media (max-width: 640px) {
+  .cards-3 { grid-template-columns: 1fr; }
+  .hero-meta { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr !important; }
+  .ts-body { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 480px) {
+  .cards-3 { grid-template-columns: 1fr 1fr; }
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+}
+.card.accent { border-left: 3px solid var(--accent); background: var(--accent-bg); border-color: var(--accent-border); }
+.card.green  { border-left: 3px solid var(--green);  background: var(--green-bg);  border-color: var(--green-border); }
+.card.blue   { border-left: 3px solid var(--blue);   background: var(--blue-bg);   border-color: var(--blue-border); }
+.card.orange { border-left: 3px solid var(--orange); background: var(--orange-bg); border-color: var(--orange-border); }
+.card-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.card.accent .card-label { color: var(--accent); }
+.card.green  .card-label { color: var(--green); }
+.card.blue   .card-label { color: var(--blue); }
+.card.orange .card-label { color: var(--orange); }
+.card-value {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.card-value code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  background: rgba(0,0,0,0.05);
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: #c2410c;
+}
+
+/* ── 트러블슈팅 케이스 ── */
+.ts-case {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.ts-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+.ts-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.ts-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.ts-badge {
+  margin-left: auto;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid;
+}
+.ts-diagram {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  overflow-x: auto;
+}
+.ts-diagram svg { width: 100%; height: auto; display: block; }
+.ts-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+.ts-col {
+  padding: 14px 18px;
+  border-right: 1px solid var(--border);
+  font-size: 13.5px;
+  line-height: 1.65;
+}
+.ts-col:last-child { border-right: none; }
+.ts-col-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 7px;
+  color: var(--text-dim);
+}
+.ts-col-text { color: var(--text-muted); }
+.ts-col-text code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  background: rgba(0,0,0,0.05);
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: #c2410c;
+}
+
+/* ── 마무리 ── */
+.ending {
+  background: linear-gradient(160deg, #1a0533 0%, #0d1117 40%, #0a1628 100%);
+  text-align: center;
+  padding: 72px 24px;
+  color: white;
+}
+.ending h2 {
+  font-size: clamp(26px, 4vw, 40px);
+  font-weight: 900;
+  margin-bottom: 12px;
+  color: #f8f8ff;
+}
+.ending-sub {
+  color: #94a3b8;
+  font-size: 15px;
+  margin-bottom: 40px;
+}
+.link-cards {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.link-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 32px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  text-decoration: none;
+  color: white;
+  min-width: 190px;
+  transition: all 0.2s;
+}
+.link-card:hover {
+  border-color: #a78bfa;
+  background: rgba(139,92,246,0.12);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(139,92,246,0.2);
+}
+.link-card svg { transition: transform 0.2s; }
+.link-card:hover svg { transform: scale(1.08); }
+.link-card-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #a78bfa;
+  text-transform: uppercase;
+}
+.link-card-name { font-size: 17px; font-weight: 700; color: #f8f8ff; }
+.link-card-desc { font-size: 12.5px; color: #94a3b8; }
+.link-card-url {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: #475569;
+}
+
+/* ── 스크롤 애니메이션 ── */
+.fade-in {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- 네비게이션 -->
+<nav>
+  <div class="nav-inner">
+    <span class="nav-logo">Unity PvP</span>
+    <a class="nav-item" href="#overview">개요</a>
+    <a class="nav-item" href="#ai">개발방식</a>
+    <a class="nav-item" href="#arch">아키텍처</a>
+    <a class="nav-item" href="#port">포트할당</a>
+    <a class="nav-item" href="#gameflow">게임흐름</a>
+    <a class="nav-item" href="#comm">통신</a>
+    <a class="nav-item" href="#authority">서버권위</a>
+    <a class="nav-item" href="#combat">전투</a>
+    <a class="nav-item" href="#result">판정&결과</a>
+    <a class="nav-item" href="#data">데이터구조</a>
+    <a class="nav-item" href="#inventory">인벤토리</a>
+    <a class="nav-item" href="#gacha">가챠</a>
+    <a class="nav-item" href="#map">맵생성</a>
+    <a class="nav-item" href="#platform">크로스플랫폼</a>
+    <a class="nav-item" href="#ts">트러블슈팅</a>
+    <a class="nav-item" href="#highlights">하이라이트</a>
+    <a class="nav-item" href="#structure">프로젝트구조</a>
+  </div>
+</nav>
+
+<!-- 히어로 -->
+<div class="hero">
+  <div class="hero-badge">TECHNICAL DOCUMENT</div>
+  <h1>Unity <span class="accent">멀티플레이</span><br>아레나 PvP</h1>
+  <p class="hero-sub">Mirror + KCP 기반 2v2 팀 PvP 게임 — 서버 권위 구조, 데디케이트 서버 동적 할당, PC·모바일 단일 코드베이스</p>
+  <div class="hero-tags">
+    <span class="hero-tag">Unity</span>
+    <span class="hero-tag">Mirror Networking</span>
+    <span class="hero-tag">KCP2K</span>
+    <span class="hero-tag">Node.js + MySQL</span>
+    <span class="hero-tag">Linux</span>
+  </div>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <div class="label">장르</div>
+      <div class="value">3인칭 아레나 팀 PvP</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="label">플랫폼</div>
+      <div class="value">PC · 모바일</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="label">개발 형태</div>
+      <div class="value">개인 (1인 개발)</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 01. 프로젝트 개요 -->
+<section class="section" id="overview">
+<div class="inner">
+  <div class="section-label">01 · OVERVIEW</div>
+  <h2 class="section-title">프로젝트 개요</h2>
+  <div class="lead-box">
+    Mirror 튜토리얼이 아닌, <strong>실제 라이브 게임의 구조</strong>를 그대로 구현한 멀티플레이 프로젝트.<br>
+    매치메이킹부터 데디 서버 동적 할당까지 처음부터 끝까지 직접 설계했습니다.
+  </div>
+  <div class="diagram-wrap fade-in"><svg viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="20" width="320" height="320" rx="8" fill="#fafafa" stroke="#e5e7eb" stroke-width="1"/>
+        <text x="40" y="50" font-family="Consolas, monospace" font-size="11" font-weight="700" fill="#7c3aed" letter-spacing="2">GAME OVERVIEW</text>
+        <text x="40" y="85" font-family="Malgun Gothic" font-size="20" font-weight="800" fill="#0a0a0a">브롤스타즈류 2v2</text>
+        <text x="40" y="112" font-family="Malgun Gothic" font-size="20" font-weight="800" fill="#0a0a0a">팀 아레나 PvP</text>
+        <text x="40" y="150" font-family="Malgun Gothic" font-size="11" fill="#555" font-style="italic">3인칭 시점 · 4명 (2v2) · 180초 매치</text>
+        <line x1="40" y1="175" x2="320" y2="175" stroke="#e5e7eb" stroke-width="1"/>
+        <text x="40" y="200" font-family="Malgun Gothic" font-size="10" fill="#888">장르</text>
+        <text x="140" y="200" font-family="Malgun Gothic" font-size="10.5" font-weight="600" fill="#1a1a1a">3인칭 아레나 팀 PvP</text>
+        <text x="40" y="225" font-family="Malgun Gothic" font-size="10" fill="#888">플레이어</text>
+        <text x="140" y="225" font-family="Malgun Gothic" font-size="10.5" font-weight="600" fill="#1a1a1a">최대 4명 (2v2)</text>
+        <text x="40" y="250" font-family="Malgun Gothic" font-size="10" fill="#888">플랫폼</text>
+        <text x="140" y="250" font-family="Malgun Gothic" font-size="10.5" font-weight="600" fill="#1a1a1a">PC · 모바일 동시 지원</text>
+        <text x="40" y="275" font-family="Malgun Gothic" font-size="10" fill="#888">개발 형태</text>
+        <text x="140" y="275" font-family="Malgun Gothic" font-size="10.5" font-weight="600" fill="#1a1a1a">개인 프로젝트 (1인)</text>
+        <text x="40" y="300" font-family="Malgun Gothic" font-size="10" fill="#888">핵심 기술</text>
+        <text x="140" y="300" font-family="Consolas, monospace" font-size="10" font-weight="600" fill="#1a1a1a">Mirror + KCP2K</text>
+
+        <text x="370" y="50" font-family="Consolas, monospace" font-size="11" font-weight="700" fill="#7c3aed" letter-spacing="2">WHY THIS MATTERS</text>
+        <text x="370" y="80" font-family="Malgun Gothic" font-size="18" font-weight="800" fill="#0a0a0a">이 프로젝트의 차별점</text>
+
+        <rect x="370" y="105" width="310" height="60" rx="4" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+        <text x="385" y="125" font-family="Consolas, monospace" font-size="11" font-weight="700" fill="#7c3aed">01</text>
+        <text x="412" y="125" font-family="Malgun Gothic" font-size="12" font-weight="700" fill="#1a1a1a">상용 구조 그대로 구현</text>
+        <text x="385" y="145" font-family="Malgun Gothic" font-size="9.5" fill="#555">로비/배틀 서버 분리 · 포트 동적 할당</text>
+        <text x="385" y="158" font-family="Malgun Gothic" font-size="9.5" fill="#555">실제 라이브 게임에서 사용하는 구조</text>
+
+        <rect x="370" y="180" width="310" height="60" rx="4" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+        <text x="385" y="200" font-family="Consolas, monospace" font-size="11" font-weight="700" fill="#059669">02</text>
+        <text x="412" y="200" font-family="Malgun Gothic" font-size="12" font-weight="700" fill="#1a1a1a">서버 권위 모델로 치트 차단</text>
+        <text x="385" y="220" font-family="Malgun Gothic" font-size="9.5" fill="#555">스탯 · 쿨다운 · 데미지 서버 재계산</text>
+        <text x="385" y="233" font-family="Malgun Gothic" font-size="9.5" fill="#555">클라이언트 조작 원천 차단</text>
+
+        <rect x="370" y="255" width="310" height="60" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+        <text x="385" y="275" font-family="Consolas, monospace" font-size="11" font-weight="700" fill="#2563eb">03</text>
+        <text x="412" y="275" font-family="Malgun Gothic" font-size="12" font-weight="700" fill="#1a1a1a">PC · 모바일 단일 코드베이스</text>
+        <text x="385" y="295" font-family="Malgun Gothic" font-size="9.5" fill="#555">IPlayerInputProvider 인터페이스</text>
+        <text x="385" y="308" font-family="Malgun Gothic" font-size="9.5" fill="#555">플랫폼 분기 코드 0줄</text>
+      </svg></div>
+  <div class="cards-3">
+    <div class="card accent"><div class="card-label">목표</div><div class="card-value">상용 멀티플레이 게임의 서버 구조를 처음부터 끝까지 직접 설계하고 구현</div></div>
+    <div class="card green"><div class="card-label">핵심 차별점</div><div class="card-value">로비/배틀 서버 분리 · 포트 동적 할당 · 서버 권위 모델 · 단일 코드베이스</div></div>
+    <div class="card blue"><div class="card-label">결과물</div><div class="card-value">실제 매치메이킹과 동시 다중 매치가 가능한 동작하는 멀티플레이 게임</div></div>
+  </div>
+</div>
+</section>
+
+<!-- 02. 개발 방식 -->
+<section class="section" id="ai">
+<div class="inner">
+  <div class="section-label">02 · AI COLLABORATION</div>
+  <h2 class="section-title">개발 방식 — Harness Engineering</h2>
+  <div class="lead-box">
+    <strong>원리를 먼저 이해하고, 그 다음에 에이전트를 활용했습니다.</strong><br>
+    무엇을 시킬지 알아야 에이전트를 제대로 쓸 수 있기 때문입니다.
+  </div>
+  <div class="diagram-wrap fade-in"><svg viewBox="0 0 700 340" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- Phase 1 -->
+        <g transform="translate(20, 20)">
+          <rect width="310" height="290" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+          <rect x="0" y="0" width="310" height="48" rx="8" fill="#7c3aed"/>
+          <text x="20" y="22" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="white" letter-spacing="2">PHASE 1 · 초반</text>
+          <text x="20" y="40" font-family="Malgun Gothic" font-size="13" font-weight="800" fill="white">원리 이해 + 직접 구현</text>
+
+          <!-- 아이콘: 채팅 -->
+          <circle cx="50" cy="95" r="22" fill="white" stroke="#7c3aed" stroke-width="2"/>
+          <rect x="36" y="85" width="28" height="18" rx="3" fill="#7c3aed"/>
+          <polygon points="38,103 50,103 44,113" fill="#7c3aed"/>
+          <text x="36" y="98" font-family="Malgun Gothic" font-size="8" fill="white">AI 채팅</text>
+
+          <text x="85" y="88" font-family="Malgun Gothic" font-size="13" font-weight="700" fill="#5b21b6">AI 채팅으로 원리 학습</text>
+          <text x="85" y="106" font-family="Malgun Gothic" font-size="10" fill="#555">질문 → 답변 → 직접 적용</text>
+
+          <line x1="20" y1="125" x2="290" y2="125" stroke="#c4b5fd" stroke-width="1"/>
+
+          <text x="20" y="148" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#888">학습한 내용</text>
+          <text x="20" y="168" font-family="Malgun Gothic" font-size="10" fill="#555">· Mirror 네트워크 구조와 동작 원리</text>
+          <text x="20" y="185" font-family="Malgun Gothic" font-size="10" fill="#555">· 서버 권위 모델 · SyncVar · Command/RPC</text>
+          <text x="20" y="202" font-family="Malgun Gothic" font-size="10" fill="#555">· 로비/배틀 서버 분리 설계</text>
+          <text x="20" y="219" font-family="Malgun Gothic" font-size="10" fill="#555">· 트러블슈팅 2 · 3 · 4번 해결 방식</text>
+
+          <line x1="20" y1="232" x2="290" y2="232" stroke="#c4b5fd" stroke-width="1"/>
+
+          <rect x="20" y="248" width="270" height="28" rx="4" fill="white" stroke="#c4b5fd"/>
+          <text x="155" y="266" font-family="Malgun Gothic" font-size="10" fill="#5b21b6" text-anchor="middle" font-style="italic">코드 한 줄도 원리를 이해한 상태에서 작성</text>
+        </g>
+
+        <!-- 화살표 -->
+        <g transform="translate(340, 145)">
+          <line x1="0" y1="0" x2="30" y2="0" stroke="#1a1a1a" stroke-width="2"/>
+          <polygon points="30,0 20,-5 20,5" fill="#1a1a1a"/>
+          <text x="5" y="-8" font-family="Malgun Gothic" font-size="9" fill="#888">전환</text>
+        </g>
+
+        <!-- Phase 2 -->
+        <g transform="translate(375, 20)">
+          <rect width="305" height="290" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+          <rect x="0" y="0" width="305" height="48" rx="8" fill="#059669"/>
+          <text x="20" y="22" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="white" letter-spacing="2">PHASE 2 · 중반 이후</text>
+          <text x="20" y="40" font-family="Malgun Gothic" font-size="13" font-weight="800" fill="white">Harness Engineering</text>
+
+          <!-- 아이콘: 에이전트 -->
+          <circle cx="48" cy="95" r="22" fill="white" stroke="#059669" stroke-width="2"/>
+          <rect x="36" y="85" width="24" height="14" rx="3" fill="#059669"/>
+          <circle cx="42" cy="96" r="2" fill="white"/>
+          <circle cx="54" cy="96" r="2" fill="white"/>
+          <text x="34" y="108" font-family="Consolas, monospace" font-size="7" fill="#059669">Agent</text>
+
+          <text x="82" y="88" font-family="Malgun Gothic" font-size="13" font-weight="700" fill="#047857">Claude Code 에이전트 협업</text>
+          <text x="82" y="106" font-family="Malgun Gothic" font-size="10" fill="#555">CLAUDE.md 작성 → 에이전트에게 지시</text>
+
+          <line x1="20" y1="125" x2="285" y2="125" stroke="#a7f3d0" stroke-width="1"/>
+
+          <text x="20" y="148" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#888">CLAUDE.md에 명시한 것</text>
+          <text x="20" y="168" font-family="Malgun Gothic" font-size="10" fill="#555">· 프로젝트 폴더 구조와 역할</text>
+          <text x="20" y="185" font-family="Malgun Gothic" font-size="10" fill="#555">· 코딩 컨벤션 · 네이밍 규칙</text>
+          <text x="20" y="202" font-family="Malgun Gothic" font-size="10" fill="#555">· Mirror 사용 규칙 (Cmd/Rpc 패턴)</text>
+          <text x="20" y="219" font-family="Malgun Gothic" font-size="10" fill="#555">· 트러블슈팅 1번 — 에이전트가 분석·해결</text>
+
+          <line x1="20" y1="232" x2="285" y2="232" stroke="#a7f3d0" stroke-width="1"/>
+
+          <rect x="20" y="248" width="265" height="28" rx="4" fill="white" stroke="#a7f3d0"/>
+          <text x="152" y="266" font-family="Malgun Gothic" font-size="10" fill="#047857" text-anchor="middle" font-style="italic">설계 결정과 코드 리뷰는 직접 수행</text>
+        </g>
+      </svg></div>
+  <div class="cards-3">
+    <div class="card accent"><div class="card-label">왜 이 순서인가</div><div class="card-value">원리를 모르면 에이전트에게 무엇을 시킬지도 모름. 이해가 먼저, 위임이 나중</div></div>
+    <div class="card green"><div class="card-label">Harness Engineering</div><div class="card-value"><code>CLAUDE.md</code>로 프로젝트 컨텍스트·규칙을 명시해 에이전트가 일관된 코드 생성</div></div>
+    <div class="card blue"><div class="card-label">결과</div><div class="card-value">1인 개발로 이 규모의 프로젝트를 완성. AI를 도구로 활용하는 능력 자체도 현대 개발 역량</div></div>
+  </div>
+</div>
+</section>
+
+<!-- 03. 아키텍처 -->
+<section class="section" id="arch">
+<div class="inner">
+  <div class="section-label">03 · ARCHITECTURE</div>
+  <h2 class="section-title">시스템 아키텍처</h2>
+  <div class="lead-box">
+    <strong>3-tier 구조</strong>로 클라이언트 · 백엔드 API · 게임 서버를 분리.<br>
+    영속 데이터는 HTTP REST로, 실시간 동기화는 KCP/UDP로 — 트래픽 특성에 맞춰 프로토콜을 나눴습니다.
+  </div>
+  <div class="diagram-wrap fade-in"><svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ar-green-arch" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#059669"/></marker>
+          <marker id="ar-blue-arch" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/></marker>
+        </defs>
+        <rect x="40" y="20" width="180" height="100" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+        <text x="130" y="48" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#5b21b6" text-anchor="middle" letter-spacing="2">CLIENT</text>
+        <text x="130" y="72" font-family="Malgun Gothic" font-size="14" font-weight="800" fill="#5b21b6" text-anchor="middle">Unity 클라이언트</text>
+        <text x="130" y="92" font-family="Malgun Gothic" font-size="9.5" fill="#7c3aed" text-anchor="middle">PC · 모바일</text>
+        <text x="130" y="108" font-family="Consolas, monospace" font-size="9" fill="#7c3aed" text-anchor="middle">Mirror Networking</text>
+
+        <rect x="260" y="20" width="180" height="100" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
+        <text x="350" y="48" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#047857" text-anchor="middle" letter-spacing="2">BACKEND API</text>
+        <text x="350" y="72" font-family="Malgun Gothic" font-size="14" font-weight="800" fill="#047857" text-anchor="middle">Node.js + MySQL</text>
+        <text x="350" y="92" font-family="Malgun Gothic" font-size="9.5" fill="#059669" text-anchor="middle">영속 데이터</text>
+        <text x="350" y="108" font-family="Consolas, monospace" font-size="9" fill="#059669" text-anchor="middle">REST API</text>
+
+        <rect x="480" y="20" width="180" height="100" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+        <text x="570" y="48" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#1e40af" text-anchor="middle" letter-spacing="2">GAME SERVERS</text>
+        <text x="570" y="72" font-family="Malgun Gothic" font-size="14" font-weight="800" fill="#1e40af" text-anchor="middle">Mirror + KCP2K</text>
+        <text x="570" y="92" font-family="Malgun Gothic" font-size="9.5" fill="#2563eb" text-anchor="middle">실시간 게임 서버</text>
+        <text x="570" y="108" font-family="Consolas, monospace" font-size="9" fill="#2563eb" text-anchor="middle">Dedicated Server</text>
+
+        <line x1="220" y1="55" x2="260" y2="55" stroke="#059669" stroke-width="2" marker-end="url(#ar-green-arch)"/>
+        <line x1="260" y1="85" x2="220" y2="85" stroke="#059669" stroke-width="2" marker-end="url(#ar-green-arch)" stroke-dasharray="4,3"/>
+        <text x="240" y="42" font-family="Consolas, monospace" font-size="8" font-weight="700" fill="#059669" text-anchor="middle">HTTP</text>
+
+        <line x1="440" y1="55" x2="480" y2="55" stroke="#2563eb" stroke-width="2" marker-end="url(#ar-blue-arch)"/>
+        <line x1="480" y1="85" x2="440" y2="85" stroke="#2563eb" stroke-width="2" marker-end="url(#ar-blue-arch)" stroke-dasharray="4,3"/>
+        <text x="460" y="42" font-family="Consolas, monospace" font-size="8" font-weight="700" fill="#2563eb">KCP/UDP</text>
+
+        <rect x="40" y="200" width="620" height="160" rx="6" fill="#fafafa" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="350" y="226" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#888" text-anchor="middle" letter-spacing="2">GAME SERVER POOL</text>
+
+        <rect x="80" y="245" width="170" height="90" rx="6" fill="white" stroke="#2563eb" stroke-width="2"/>
+        <text x="100" y="270" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#2563eb">:7777</text>
+        <text x="165" y="270" font-family="Malgun Gothic" font-size="12" font-weight="700" fill="#1e40af" text-anchor="middle">로비 서버</text>
+        <line x1="95" y1="282" x2="235" y2="282" stroke="#dbeafe" stroke-width="1"/>
+        <text x="165" y="300" font-family="Malgun Gothic" font-size="10" fill="#1e40af" text-anchor="middle">매치메이킹 큐 관리</text>
+        <text x="165" y="318" font-family="Malgun Gothic" font-size="9.5" fill="#555" text-anchor="middle">4명 모이면 포트 발급 요청</text>
+
+        <rect x="280" y="245" width="380" height="90" rx="6" fill="white" stroke="#ea580c" stroke-width="2"/>
+        <text x="300" y="270" font-family="Malgun Gothic" font-size="12" font-weight="700" fill="#c2410c">배틀 서버 풀 (Pool)</text>
+        <text x="640" y="270" font-family="Malgun Gothic" font-size="9" fill="#888" text-anchor="end">동적 할당</text>
+        <line x1="300" y1="280" x2="640" y2="280" stroke="#fed7aa" stroke-width="1"/>
+
+        <rect x="300" y="293" width="105" height="32" rx="3" fill="#fff7ed" stroke="#ea580c" stroke-width="1"/>
+        <text x="352" y="307" font-family="Consolas, monospace" font-size="11" font-weight="700" fill="#ea580c" text-anchor="middle">:7778</text>
+        <text x="352" y="320" font-family="Malgun Gothic" font-size="8.5" fill="#c2410c" text-anchor="middle">배틀 #1</text>
+
+        <rect x="415" y="293" width="105" height="32" rx="3" fill="#fff7ed" stroke="#ea580c" stroke-width="1"/>
+        <text x="467" y="307" font-family="Consolas, monospace" font-size="11" font-weight="700" fill="#ea580c" text-anchor="middle">:7779</text>
+        <text x="467" y="320" font-family="Malgun Gothic" font-size="8.5" fill="#c2410c" text-anchor="middle">배틀 #2</text>
+
+        <rect x="530" y="293" width="105" height="32" rx="3" fill="#fff7ed" stroke="#ea580c" stroke-width="1"/>
+        <text x="582" y="307" font-family="Consolas, monospace" font-size="11" font-weight="700" fill="#ea580c" text-anchor="middle">:7780</text>
+        <text x="582" y="320" font-family="Malgun Gothic" font-size="8.5" fill="#c2410c" text-anchor="middle">배틀 #3</text>
+
+        <line x1="570" y1="120" x2="570" y2="200" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ar-blue-arch)"/>
+        <path d="M 350 120 Q 350 170 200 200" fill="none" stroke="#059669" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ar-green-arch)"/>
+        <text x="280" y="170" font-family="Consolas, monospace" font-size="8" font-weight="700" fill="#059669">AcquirePort</text>
+      </svg></div>
+  <div class="cards-3">
+    <div class="card accent"><div class="card-label">클라이언트</div><div class="card-value">Unity 단일 빌드로 PC·모바일 동시 지원. Mirror로 게임 서버 연결</div></div>
+    <div class="card green"><div class="card-label">백엔드 API</div><div class="card-value">계정·인벤토리·가챠·매치 결과 저장. <code>POST /match/acquire</code>로 포트 발급</div></div>
+    <div class="card blue"><div class="card-label">게임 서버</div><div class="card-value">로비 1개 + 배틀 3개. 모두 Unity 배치모드로 실행되는 독립 프로세스</div></div>
+  </div>
+</div>
+</section>
+
+<!-- 04. 동적 포트 할당 -->
+<section class="section" id="port">
+<div class="inner">
+  <div class="section-label">04 · DESIGN DECISION</div>
+  <h2 class="section-title">동적 포트 할당</h2>
+  <div class="lead-box">
+    배틀 서버를 <strong>포트 풀(7778~7780)</strong>로 관리해 최대 3개 매치를 동시 진행.<br>
+    백엔드가 사용 가능한 포트를 발급하고 매치 종료 시 자동 반환합니다.
+  </div>
+  <div class="diagram-wrap fade-in"><svg viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ar-green-port" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#059669"/></marker>
+        </defs>
+        <rect x="20" y="20" width="320" height="320" rx="8" fill="#fef2f2" stroke="#fecaca" stroke-width="1"/>
+        <text x="40" y="50" font-family="Consolas, monospace" font-size="11" font-weight="700" fill="#dc2626" letter-spacing="2">PROBLEM</text>
+        <text x="40" y="80" font-family="Malgun Gothic" font-size="18" font-weight="800" fill="#0a0a0a">단일 포트 사용 시</text>
+
+        <rect x="40" y="110" width="280" height="60" rx="4" fill="white" stroke="#dc2626" stroke-width="1"/>
+        <text x="55" y="135" font-family="Malgun Gothic" font-size="14" font-weight="700" fill="#dc2626">X</text>
+        <text x="75" y="135" font-family="Malgun Gothic" font-size="11.5" font-weight="700" fill="#1a1a1a">동시 매치 1개만 가능</text>
+        <text x="75" y="155" font-family="Malgun Gothic" font-size="9.5" fill="#555">한 매치 진행 중이면 다른 4명은 대기</text>
+
+        <rect x="40" y="180" width="280" height="60" rx="4" fill="white" stroke="#dc2626" stroke-width="1"/>
+        <text x="55" y="205" font-family="Malgun Gothic" font-size="14" font-weight="700" fill="#dc2626">X</text>
+        <text x="75" y="205" font-family="Malgun Gothic" font-size="11.5" font-weight="700" fill="#1a1a1a">포트 충돌</text>
+        <text x="75" y="225" font-family="Malgun Gothic" font-size="9.5" fill="#555">두 매치 동시 띄우면 같은 포트 점유 불가</text>
+
+        <rect x="40" y="250" width="280" height="60" rx="4" fill="white" stroke="#dc2626" stroke-width="1"/>
+        <text x="55" y="275" font-family="Malgun Gothic" font-size="14" font-weight="700" fill="#dc2626">X</text>
+        <text x="75" y="275" font-family="Malgun Gothic" font-size="11.5" font-weight="700" fill="#1a1a1a">확장 불가</text>
+        <text x="75" y="295" font-family="Malgun Gothic" font-size="9.5" fill="#555">유저가 늘어나면 즉시 병목 발생</text>
+
+        <line x1="345" y1="180" x2="365" y2="180" stroke="#888" stroke-width="2" marker-end="url(#ar-green-port)"/>
+
+        <rect x="380" y="20" width="300" height="320" rx="8" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1"/>
+        <text x="400" y="50" font-family="Consolas, monospace" font-size="11" font-weight="700" fill="#059669" letter-spacing="2">SOLUTION</text>
+        <text x="400" y="80" font-family="Malgun Gothic" font-size="18" font-weight="800" fill="#0a0a0a">포트 풀(Pool) 도입</text>
+
+        <text x="400" y="115" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#888" letter-spacing="1">PORT POOL</text>
+
+        <rect x="400" y="125" width="85" height="65" rx="6" fill="white" stroke="#ea580c" stroke-width="2"/>
+        <text x="442" y="148" font-family="Consolas, monospace" font-size="14" font-weight="800" fill="#ea580c" text-anchor="middle">:7778</text>
+        <text x="442" y="165" font-family="Malgun Gothic" font-size="9" fill="#888" text-anchor="middle">배틀 서버 #1</text>
+        <text x="442" y="180" font-family="Malgun Gothic" font-size="8.5" fill="#059669" text-anchor="middle">사용중</text>
+
+        <rect x="494" y="125" width="85" height="65" rx="6" fill="white" stroke="#ea580c" stroke-width="2"/>
+        <text x="536" y="148" font-family="Consolas, monospace" font-size="14" font-weight="800" fill="#ea580c" text-anchor="middle">:7779</text>
+        <text x="536" y="165" font-family="Malgun Gothic" font-size="9" fill="#888" text-anchor="middle">배틀 서버 #2</text>
+        <text x="536" y="180" font-family="Malgun Gothic" font-size="8.5" fill="#9ca3af" text-anchor="middle">대기</text>
+
+        <rect x="588" y="125" width="85" height="65" rx="6" fill="white" stroke="#ea580c" stroke-width="2"/>
+        <text x="630" y="148" font-family="Consolas, monospace" font-size="14" font-weight="800" fill="#ea580c" text-anchor="middle">:7780</text>
+        <text x="630" y="165" font-family="Malgun Gothic" font-size="9" fill="#888" text-anchor="middle">배틀 서버 #3</text>
+        <text x="630" y="180" font-family="Malgun Gothic" font-size="8.5" fill="#9ca3af" text-anchor="middle">대기</text>
+
+        <text x="400" y="220" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#888" letter-spacing="1">FLOW</text>
+        <text x="400" y="243" font-family="Malgun Gothic" font-size="10" fill="#1a1a1a"><tspan font-weight="700" fill="#059669">1.</tspan>  4명 매치 성립</text>
+        <text x="400" y="262" font-family="Malgun Gothic" font-size="10" fill="#1a1a1a"><tspan font-weight="700" fill="#059669">2.</tspan>  AcquirePort 요청 → 백엔드</text>
+        <text x="400" y="281" font-family="Malgun Gothic" font-size="10" fill="#1a1a1a"><tspan font-weight="700" fill="#059669">3.</tspan>  사용 가능한 포트 발급 (예: 7779)</text>
+        <text x="400" y="300" font-family="Malgun Gothic" font-size="10" fill="#1a1a1a"><tspan font-weight="700" fill="#059669">4.</tspan>  매치 종료 시 ReleasePort로 반환</text>
+
+        <rect x="400" y="315" width="270" height="20" rx="3" fill="#059669"/>
+        <text x="535" y="329" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="white" text-anchor="middle">최대 3개 매치 동시 진행</text>
+      </svg></div>
+  <div class="cards-3">
+    <div class="card green"><div class="card-label">발급 API</div><div class="card-value"><code>POST /match/acquire</code> → <code>{ port: 7779 }</code></div></div>
+    <div class="card orange"><div class="card-label">반환 API</div><div class="card-value"><code>POST /match/release</code> — 매치 종료 시 자동 호출</div></div>
+    <div class="card accent"><div class="card-label">확장 방법</div><div class="card-value">유저 증가 시 풀 크기만 늘리면 됨. 코드 변경 없이 수평 확장 가능</div></div>
+  </div>
+</div>
+</section>
+
+<!-- 05. 게임 흐름 -->
+<section class="section" id="gameflow">
+<div class="inner">
+  <div class="section-label">05 · SCENE FLOW</div>
+  <h2 class="section-title">게임 흐름</h2>
+  <div class="lead-box">
+    유저는 <strong>5개 씬</strong>을 거치며, 각 씬은 독립된 NetworkManager 컨텍스트를 가집니다.<br>
+    로비 ↔ 배틀 전환 시 <code>StopClient</code> → 새 서버 <code>StartClient</code>로 연결을 재맺습니다.
+  </div>
+  <div class="diagram-wrap fade-in"><svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ar-flow-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/></marker>
+        </defs>
+
+        <g transform="translate(20, 30)">
+          <rect width="125" height="280" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+          <text x="62.5" y="25" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#7c3aed" text-anchor="middle" letter-spacing="2">SCENE 1</text>
+          <circle cx="62.5" cy="65" r="22" fill="white" stroke="#7c3aed" stroke-width="2"/>
+          <polygon points="55,55 55,75 75,65" fill="#7c3aed"/>
+          <text x="62.5" y="115" font-family="Malgun Gothic" font-size="14" font-weight="800" fill="#5b21b6" text-anchor="middle">부팅</text>
+          <text x="62.5" y="132" font-family="Consolas, monospace" font-size="9" fill="#7c3aed" text-anchor="middle">BootScene</text>
+          <line x1="20" y1="148" x2="105" y2="148" stroke="#c4b5fd" stroke-width="1"/>
+          <text x="62.5" y="167" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">최초 진입 씬</text>
+          <text x="62.5" y="182" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">매니저 초기화</text>
+          <text x="62.5" y="197" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">다음 씬 로드</text>
+          <text x="62.5" y="225" font-family="Consolas, monospace" font-size="8" font-weight="700" fill="#7c3aed" text-anchor="middle">CORE</text>
+          <rect x="15" y="232" width="95" height="18" rx="3" fill="white" stroke="#c4b5fd" stroke-width="1"/>
+          <text x="62.5" y="245" font-family="Consolas, monospace" font-size="8.5" font-weight="700" fill="#5b21b6" text-anchor="middle">BootManager</text>
+          <text x="62.5" y="265" font-family="Consolas, monospace" font-size="7.5" fill="#888" text-anchor="middle">GameDataManager</text>
+        </g>
+
+        <line x1="148" y1="170" x2="158" y2="170" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#ar-flow-s)"/>
+
+        <g transform="translate(160, 30)">
+          <rect width="125" height="280" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+          <text x="62.5" y="25" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#7c3aed" text-anchor="middle" letter-spacing="2">SCENE 2</text>
+          <circle cx="62.5" cy="65" r="22" fill="white" stroke="#7c3aed" stroke-width="2"/>
+          <path d="M 52 60 L 62 60 L 62 55 L 73 65 L 62 75 L 62 70 L 52 70 Z" fill="#7c3aed"/>
+          <rect x="55" y="58" width="3" height="14" fill="#7c3aed"/>
+          <text x="62.5" y="115" font-family="Malgun Gothic" font-size="14" font-weight="800" fill="#5b21b6" text-anchor="middle">로그인</text>
+          <text x="62.5" y="132" font-family="Consolas, monospace" font-size="9" fill="#7c3aed" text-anchor="middle">LoginScene</text>
+          <line x1="20" y1="148" x2="105" y2="148" stroke="#c4b5fd" stroke-width="1"/>
+          <text x="62.5" y="167" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">계정 인증</text>
+          <text x="62.5" y="182" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">유저 데이터 복원</text>
+          <text x="62.5" y="197" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">인벤토리 로드</text>
+          <text x="62.5" y="225" font-family="Consolas, monospace" font-size="8" font-weight="700" fill="#7c3aed" text-anchor="middle">CORE</text>
+          <rect x="15" y="232" width="95" height="18" rx="3" fill="white" stroke="#c4b5fd" stroke-width="1"/>
+          <text x="62.5" y="245" font-family="Consolas, monospace" font-size="8.5" font-weight="700" fill="#5b21b6" text-anchor="middle">LoginController</text>
+          <text x="62.5" y="265" font-family="Consolas, monospace" font-size="7.5" fill="#888" text-anchor="middle">BackendManager</text>
+        </g>
+
+        <line x1="288" y1="170" x2="298" y2="170" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#ar-flow-s)"/>
+
+        <g transform="translate(300, 30)">
+          <rect width="125" height="280" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+          <text x="62.5" y="25" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#2563eb" text-anchor="middle" letter-spacing="2">SCENE 3</text>
+          <circle cx="62.5" cy="65" r="22" fill="white" stroke="#2563eb" stroke-width="2"/>
+          <circle cx="62.5" cy="65" r="14" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-dasharray="20 8" transform="rotate(-90 62.5 65)"/>
+          <text x="62.5" y="115" font-family="Malgun Gothic" font-size="14" font-weight="800" fill="#1e40af" text-anchor="middle">로딩</text>
+          <text x="62.5" y="132" font-family="Consolas, monospace" font-size="9" fill="#2563eb" text-anchor="middle">LoadingScene</text>
+          <line x1="20" y1="148" x2="105" y2="148" stroke="#93c5fd" stroke-width="1"/>
+          <text x="62.5" y="167" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">게임 서버 연결</text>
+          <text x="62.5" y="182" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">KcpTransport 설정</text>
+          <text x="62.5" y="197" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">5초 타임아웃</text>
+          <text x="62.5" y="225" font-family="Consolas, monospace" font-size="8" font-weight="700" fill="#2563eb" text-anchor="middle">CORE</text>
+          <rect x="15" y="232" width="95" height="18" rx="3" fill="white" stroke="#93c5fd" stroke-width="1"/>
+          <text x="62.5" y="245" font-family="Consolas, monospace" font-size="8" font-weight="700" fill="#1e40af" text-anchor="middle">LoadingSceneMgr</text>
+          <text x="62.5" y="265" font-family="Consolas, monospace" font-size="7.5" fill="#888" text-anchor="middle">MyAuthenticator</text>
+        </g>
+
+        <line x1="428" y1="170" x2="438" y2="170" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#ar-flow-s)"/>
+
+        <g transform="translate(440, 30)">
+          <rect width="125" height="280" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+          <text x="62.5" y="25" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#7c3aed" text-anchor="middle" letter-spacing="2">SCENE 4</text>
+          <circle cx="62.5" cy="65" r="22" fill="white" stroke="#7c3aed" stroke-width="2"/>
+          <path d="M 52 70 L 52 60 L 62 52 L 72 60 L 72 70 L 67 70 L 67 65 L 57 65 L 57 70 Z" fill="#7c3aed"/>
+          <text x="62.5" y="115" font-family="Malgun Gothic" font-size="14" font-weight="800" fill="#5b21b6" text-anchor="middle">메인 로비</text>
+          <text x="62.5" y="132" font-family="Consolas, monospace" font-size="9" fill="#7c3aed" text-anchor="middle">MainLobbyScene</text>
+          <line x1="20" y1="148" x2="105" y2="148" stroke="#c4b5fd" stroke-width="1"/>
+          <text x="62.5" y="167" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">상점 · 인벤토리</text>
+          <text x="62.5" y="182" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">매칭 큐 등록</text>
+          <text x="62.5" y="197" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">4명 모이면 전환</text>
+          <text x="62.5" y="225" font-family="Consolas, monospace" font-size="8" font-weight="700" fill="#7c3aed" text-anchor="middle">CORE</text>
+          <rect x="15" y="232" width="95" height="18" rx="3" fill="white" stroke="#c4b5fd" stroke-width="1"/>
+          <text x="62.5" y="245" font-family="Consolas, monospace" font-size="8.5" font-weight="700" fill="#5b21b6" text-anchor="middle">LobbyController</text>
+          <text x="62.5" y="265" font-family="Consolas, monospace" font-size="7.5" fill="#888" text-anchor="middle">Shop/Inventory</text>
+        </g>
+
+        <line x1="568" y1="170" x2="578" y2="170" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#ar-flow-s)"/>
+
+        <g transform="translate(580, 30)">
+          <rect width="100" height="280" rx="6" fill="#fed7aa" stroke="#ea580c" stroke-width="2"/>
+          <text x="50" y="25" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#ea580c" text-anchor="middle" letter-spacing="2">SCENE 5</text>
+          <circle cx="50" cy="65" r="22" fill="white" stroke="#ea580c" stroke-width="2"/>
+          <rect x="38" y="60" width="24" height="14" rx="6" fill="#ea580c"/>
+          <circle cx="44" cy="67" r="2" fill="white"/>
+          <circle cx="56" cy="67" r="2" fill="white"/>
+          <text x="50" y="115" font-family="Malgun Gothic" font-size="14" font-weight="800" fill="#c2410c" text-anchor="middle">전투</text>
+          <text x="50" y="132" font-family="Consolas, monospace" font-size="9" fill="#ea580c" text-anchor="middle">BattleScene</text>
+          <line x1="15" y1="148" x2="85" y2="148" stroke="#fdba74" stroke-width="1"/>
+          <text x="50" y="167" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">2v2 PvP 전투</text>
+          <text x="50" y="182" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">팀 배정 · 스폰</text>
+          <text x="50" y="197" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">180초 후 결과</text>
+          <text x="50" y="225" font-family="Consolas, monospace" font-size="8" font-weight="700" fill="#ea580c" text-anchor="middle">CORE</text>
+          <rect x="10" y="232" width="80" height="18" rx="3" fill="white" stroke="#fdba74" stroke-width="1"/>
+          <text x="50" y="245" font-family="Consolas, monospace" font-size="8" font-weight="700" fill="#c2410c" text-anchor="middle">BattleManager</text>
+          <text x="50" y="265" font-family="Consolas, monospace" font-size="7.5" fill="#888" text-anchor="middle">SpawnManager</text>
+        </g>
+
+        <path d="M 630 320 Q 630 350 350 350 Q 60 350 82 320" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ar-flow-s)"/>
+        <text x="350" y="370" font-family="Malgun Gothic" font-size="9.5" fill="#888" text-anchor="middle" font-style="italic">전투 종료 후 로비 씬으로 복귀 · 반복</text>
+      </svg></div>
+  <div class="cards-3">
+    <div class="card accent"><div class="card-label">씬 분리 의도</div><div class="card-value">각 씬이 한 가지 책임만. 로비는 매칭만, 배틀은 전투만 — 디버깅 용이</div></div>
+    <div class="card blue"><div class="card-label">네트워크 컨텍스트</div><div class="card-value">씬 전환마다 연결을 끊고 새로 맺어 각 씬의 네트워크 상태 독립 유지</div></div>
+    <div class="card green"><div class="card-label">메모리 효율</div><div class="card-value">씬 전환 시 이전 씬 리소스 해제. 배틀 중에는 로비 UI가 메모리에 없음</div></div>
+  </div>
+</div>
+</section>
+
+<!-- 06. 통신 시퀀스 -->
+<section class="section" id="comm">
+<div class="inner">
+  <div class="section-label">06 · COMMUNICATION</div>
+  <h2 class="section-title">통신 시퀀스</h2>
+  <div class="lead-box">
+    매칭 시점에 <strong>클라이언트 ↔ 3종 서버(로비/백엔드/배틀)</strong> 사이에서 9번의 메시지가 오갑니다.<br>
+    백엔드의 포트 발급이 핵심 — 이 단계가 동적 할당의 시작점입니다.
+  </div>
+  <div class="diagram-wrap fade-in"><svg viewBox="0 0 700 410" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ar-p-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker>
+          <marker id="ar-b-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/></marker>
+          <marker id="ar-g-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#059669"/></marker>
+          <marker id="ar-o-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ea580c"/></marker>
+        </defs>
+
+        <g>
+          <circle cx="100" cy="35" r="22" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+          <rect x="92" y="25" width="16" height="22" rx="2" fill="#7c3aed"/>
+          <rect x="94" y="28" width="12" height="14" fill="#ede9fe"/>
+          <circle cx="100" cy="44" r="1.5" fill="#ede9fe"/>
+          <rect x="60" y="68" width="80" height="22" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="1"/>
+          <text x="100" y="83" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#5b21b6" text-anchor="middle">클라 (4명)</text>
+          <line x1="100" y1="100" x2="100" y2="390" stroke="#7c3aed" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+        </g>
+
+        <g>
+          <circle cx="290" cy="35" r="22" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+          <circle cx="284" cy="30" r="5" fill="#2563eb"/>
+          <circle cx="296" cy="30" r="5" fill="#2563eb"/>
+          <path d="M 278 45 Q 290 52 302 45" fill="none" stroke="#2563eb" stroke-width="2"/>
+          <rect x="250" y="68" width="80" height="22" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1"/>
+          <text x="290" y="83" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#1e40af" text-anchor="middle">로비 서버</text>
+          <line x1="290" y1="100" x2="290" y2="390" stroke="#2563eb" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+        </g>
+
+        <g>
+          <circle cx="480" cy="35" r="22" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
+          <ellipse cx="480" cy="28" rx="12" ry="4" fill="#059669"/>
+          <ellipse cx="480" cy="35" rx="12" ry="4" fill="none" stroke="#059669" stroke-width="2"/>
+          <ellipse cx="480" cy="42" rx="12" ry="4" fill="none" stroke="#059669" stroke-width="2"/>
+          <rect x="440" y="68" width="80" height="22" rx="3" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+          <text x="480" y="83" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#047857" text-anchor="middle">백엔드 API</text>
+          <line x1="480" y1="100" x2="480" y2="390" stroke="#059669" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+        </g>
+
+        <g>
+          <circle cx="640" cy="35" r="22" fill="#fed7aa" stroke="#ea580c" stroke-width="2"/>
+          <rect x="628" y="30" width="24" height="14" rx="6" fill="#ea580c"/>
+          <circle cx="634" cy="37" r="2" fill="#fed7aa"/>
+          <circle cx="646" cy="37" r="2" fill="#fed7aa"/>
+          <rect x="600" y="68" width="80" height="22" rx="3" fill="#fed7aa" stroke="#ea580c" stroke-width="1"/>
+          <text x="640" y="83" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#c2410c" text-anchor="middle">배틀 서버</text>
+          <line x1="640" y1="100" x2="640" y2="390" stroke="#ea580c" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+        </g>
+
+        <text x="25" y="120" font-family="Consolas, monospace" font-size="8" font-weight="700" fill="#888" letter-spacing="2">TIME</text>
+        <line x1="35" y1="125" x2="35" y2="380" stroke="#ccc" stroke-width="1"/>
+        <polygon points="35,388 31,378 39,378" fill="#ccc"/>
+
+        <line x1="100" y1="125" x2="478" y2="125" stroke="#059669" stroke-width="1.5" marker-end="url(#ar-g-c)"/>
+        <rect x="225" y="112" width="120" height="14" fill="white"/>
+        <text x="285" y="123" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#059669" text-anchor="middle">POST /login</text>
+
+        <line x1="478" y1="155" x2="102" y2="155" stroke="#059669" stroke-width="1.5" stroke-dasharray="4,3" marker-start="url(#ar-g-c)"/>
+        <rect x="240" y="142" width="90" height="14" fill="white"/>
+        <text x="285" y="153" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#059669" text-anchor="middle">userData</text>
+
+        <line x1="100" y1="190" x2="288" y2="190" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ar-b-c)"/>
+        <rect x="135" y="177" width="120" height="14" fill="white"/>
+        <text x="195" y="188" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#2563eb" text-anchor="middle">Connect :7777</text>
+
+        <line x1="100" y1="220" x2="288" y2="220" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ar-b-c)"/>
+        <rect x="125" y="207" width="140" height="14" fill="white"/>
+        <text x="195" y="218" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#2563eb" text-anchor="middle">CmdRequestMatch</text>
+
+        <rect x="298" y="240" width="180" height="40" rx="3" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="2,2"/>
+        <line x1="290" y1="255" x2="478" y2="255" stroke="#059669" stroke-width="2" marker-end="url(#ar-g-c)"/>
+        <rect x="320" y="246" width="135" height="14" fill="#fef3c7"/>
+        <text x="388" y="257" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#059669" text-anchor="middle">POST /match/acquire</text>
+        <line x1="478" y1="270" x2="292" y2="270" stroke="#059669" stroke-width="2" stroke-dasharray="4,3" marker-start="url(#ar-g-c)"/>
+        <rect x="335" y="261" width="100" height="14" fill="#fef3c7"/>
+        <text x="385" y="272" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#059669" text-anchor="middle">{ port: 7779 }</text>
+        <text x="388" y="293" font-family="Malgun Gothic" font-size="8" fill="#f59e0b" font-style="italic" text-anchor="middle">동적 포트 할당의 핵심</text>
+
+        <line x1="288" y1="310" x2="102" y2="310" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="4,3" marker-start="url(#ar-b-c)"/>
+        <rect x="120" y="297" width="150" height="14" fill="white"/>
+        <text x="195" y="308" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#2563eb" text-anchor="middle">TargetMoveToServer</text>
+
+        <line x1="100" y1="340" x2="638" y2="340" stroke="#ea580c" stroke-width="1.5" marker-end="url(#ar-o-c)"/>
+        <rect x="305" y="327" width="120" height="14" fill="white"/>
+        <text x="365" y="338" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#ea580c" text-anchor="middle">Connect :7779</text>
+
+        <line x1="638" y1="370" x2="102" y2="370" stroke="#ea580c" stroke-width="1.5" stroke-dasharray="4,3" marker-start="url(#ar-o-c)"/>
+        <rect x="295" y="357" width="135" height="14" fill="white"/>
+        <text x="362" y="368" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#ea580c" text-anchor="middle">Spawn + SyncVar</text>
+      </svg></div>
+  <div class="cards-3">
+    <div class="card green"><div class="card-label">HTTP (실선)</div><div class="card-value">백엔드 API 요청/응답. 로그인 · 매치 포트 발급</div></div>
+    <div class="card blue"><div class="card-label">Mirror Cmd/Rpc</div><div class="card-value">로비 서버와의 매칭 · 서버 전환 명령</div></div>
+    <div class="card orange"><div class="card-label">배틀 연결</div><div class="card-value">매치 포트로 4명 동시 접속. 스폰 후 SyncVar로 상태 자동 동기화</div></div>
+  </div>
+</div>
+</section>
+
+<!-- 07. 서버 권위 -->
+<section class="section" id="authority">
+<div class="inner">
+  <div class="section-label">07 · SERVER AUTHORITY</div>
+  <h2 class="section-title">서버 권위 모델</h2>
+  <div class="lead-box">
+    모든 게임 로직은 <strong>서버에서만</strong> 판정. 클라이언트는 입력 전달과 시각화만 담당.<br>
+    <code>StatUtils.Calculate</code> 단일 진입점으로 클라/서버 동일 로직 보장 — 치트 차단의 핵심입니다.
+  </div>
+  <div class="diagram-wrap fade-in"><svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ar-sa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker>
+        </defs>
+
+        <g transform="translate(20, 30)">
+          <rect width="200" height="200" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+          <circle cx="100" cy="55" r="28" fill="white" stroke="#7c3aed" stroke-width="2"/>
+          <rect x="88" y="40" width="24" height="32" rx="3" fill="#7c3aed"/>
+          <rect x="92" y="44" width="16" height="22" fill="white"/>
+          <circle cx="100" cy="70" r="2" fill="white"/>
+          <text x="100" y="105" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#7c3aed" text-anchor="middle" letter-spacing="2">STEP 1 · CLIENT</text>
+          <text x="100" y="128" font-family="Malgun Gothic" font-size="15" font-weight="800" fill="#5b21b6" text-anchor="middle">클라 입력</text>
+          <line x1="40" y1="142" x2="160" y2="142" stroke="#c4b5fd" stroke-width="1"/>
+          <text x="100" y="162" font-family="Malgun Gothic" font-size="10" fill="#555" text-anchor="middle">버튼 클릭, 이동 입력</text>
+          <text x="100" y="178" font-family="Malgun Gothic" font-size="10" fill="#555" text-anchor="middle">Command로 서버 전송</text>
+          <rect x="20" y="185" width="160" height="22" rx="3" fill="white" stroke="#c4b5fd" stroke-width="1"/>
+          <text x="100" y="200" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#5b21b6" text-anchor="middle">CmdUseAttack(id)</text>
+        </g>
+
+        <line x1="222" y1="130" x2="248" y2="130" stroke="#7c3aed" stroke-width="2.5" marker-end="url(#ar-sa)"/>
+
+        <g transform="translate(250, 30)">
+          <rect width="200" height="200" rx="8" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
+          <circle cx="100" cy="55" r="28" fill="white" stroke="#059669" stroke-width="2"/>
+          <path d="M 100 38 L 82 47 L 82 60 Q 82 73 100 80 Q 118 73 118 60 L 118 47 Z" fill="#059669"/>
+          <path d="M 92 58 L 98 64 L 109 53" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <text x="100" y="105" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#059669" text-anchor="middle" letter-spacing="2">STEP 2 · SERVER</text>
+          <text x="100" y="128" font-family="Malgun Gothic" font-size="15" font-weight="800" fill="#047857" text-anchor="middle">서버 판정</text>
+          <line x1="40" y1="142" x2="160" y2="142" stroke="#6ee7b7" stroke-width="1"/>
+          <text x="100" y="162" font-family="Malgun Gothic" font-size="10" fill="#555" text-anchor="middle">데미지 = max(1, ATK-DEF)</text>
+          <text x="100" y="178" font-family="Malgun Gothic" font-size="10" fill="#555" text-anchor="middle">HP 차감, 사망 처리</text>
+          <rect x="20" y="185" width="160" height="22" rx="3" fill="white" stroke="#6ee7b7" stroke-width="1"/>
+          <text x="100" y="200" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#047857" text-anchor="middle">TakeDamage()</text>
+        </g>
+
+        <line x1="452" y1="130" x2="478" y2="130" stroke="#7c3aed" stroke-width="2.5" marker-end="url(#ar-sa)"/>
+
+        <g transform="translate(480, 30)">
+          <rect width="200" height="200" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+          <circle cx="100" cy="55" r="28" fill="white" stroke="#2563eb" stroke-width="2"/>
+          <path d="M 100 38 A 17 17 0 1 1 84 60 L 79 55 L 89 55 L 89 60" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+          <polygon points="84,60 79,55 89,55" fill="#2563eb"/>
+          <path d="M 100 72 A 17 17 0 1 1 116 50 L 121 55 L 111 55 L 111 50" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+          <polygon points="116,50 121,55 111,55" fill="#2563eb"/>
+          <text x="100" y="105" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#2563eb" text-anchor="middle" letter-spacing="2">STEP 3 · SYNC</text>
+          <text x="100" y="128" font-family="Malgun Gothic" font-size="15" font-weight="800" fill="#1e40af" text-anchor="middle">자동 동기화</text>
+          <line x1="40" y1="142" x2="160" y2="142" stroke="#93c5fd" stroke-width="1"/>
+          <text x="100" y="162" font-family="Malgun Gothic" font-size="10" fill="#555" text-anchor="middle">SyncVar로 모든 클라에</text>
+          <text x="100" y="178" font-family="Malgun Gothic" font-size="10" fill="#555" text-anchor="middle">HP · 상태 자동 반영</text>
+          <rect x="20" y="185" width="160" height="22" rx="3" fill="white" stroke="#93c5fd" stroke-width="1"/>
+          <text x="100" y="200" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#1e40af" text-anchor="middle">[SyncVar] currentHp</text>
+        </g>
+
+        <rect x="20" y="260" width="660" height="110" rx="8" fill="#fafafa" stroke="#e5e7eb" stroke-width="1"/>
+        <text x="40" y="285" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#888" letter-spacing="2">SYNCED DATA · 자동 동기화되는 데이터</text>
+
+        <g transform="translate(40, 305)">
+          <rect width="115" height="50" rx="4" fill="white" stroke="#7c3aed" stroke-width="1.5"/>
+          <text x="57.5" y="20" font-family="Consolas, monospace" font-size="11" font-weight="700" fill="#7c3aed" text-anchor="middle">currentHp</text>
+          <text x="57.5" y="38" font-family="Malgun Gothic" font-size="8.5" fill="#888" text-anchor="middle">현재 체력</text>
+        </g>
+        <g transform="translate(165, 305)">
+          <rect width="115" height="50" rx="4" fill="white" stroke="#2563eb" stroke-width="1.5"/>
+          <text x="57.5" y="20" font-family="Consolas, monospace" font-size="11" font-weight="700" fill="#2563eb" text-anchor="middle">teamId</text>
+          <text x="57.5" y="38" font-family="Malgun Gothic" font-size="8.5" fill="#888" text-anchor="middle">팀 번호</text>
+        </g>
+        <g transform="translate(290, 305)">
+          <rect width="115" height="50" rx="4" fill="white" stroke="#059669" stroke-width="1.5"/>
+          <text x="57.5" y="20" font-family="Consolas, monospace" font-size="11" font-weight="700" fill="#059669" text-anchor="middle">stats</text>
+          <text x="57.5" y="38" font-family="Malgun Gothic" font-size="8.5" fill="#888" text-anchor="middle">최종 스탯</text>
+        </g>
+        <g transform="translate(415, 305)">
+          <rect width="115" height="50" rx="4" fill="white" stroke="#ea580c" stroke-width="1.5"/>
+          <text x="57.5" y="20" font-family="Consolas, monospace" font-size="11" font-weight="700" fill="#ea580c" text-anchor="middle">isStunned</text>
+          <text x="57.5" y="38" font-family="Malgun Gothic" font-size="8.5" fill="#888" text-anchor="middle">기절 상태</text>
+        </g>
+        <g transform="translate(540, 305)">
+          <rect width="125" height="50" rx="4" fill="white" stroke="#888" stroke-width="1.5"/>
+          <text x="62.5" y="20" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#1a1a1a" text-anchor="middle">selectedChar</text>
+          <text x="62.5" y="38" font-family="Malgun Gothic" font-size="8.5" fill="#888" text-anchor="middle">선택 캐릭터</text>
+        </g>
+      </svg></div>
+  <div class="cards-3">
+    <div class="card accent"><div class="card-label">단일 진입점</div><div class="card-value"><code>StatUtils.Calculate</code>를 클라/서버가 공유. 입력이 같으면 결과도 같음</div></div>
+    <div class="card green"><div class="card-label">검증 시점</div><div class="card-value">접속 시 <code>MyAuthenticator</code>가 스탯 재계산 → 불일치 시 연결 거부</div></div>
+    <div class="card blue"><div class="card-label">동기화 방식</div><div class="card-value">Mirror SyncVar — 서버에서 값 변경 시 모든 클라이언트에 자동 전파</div></div>
+  </div>
+</div>
+</section>
+
+<!-- 08. 전투 시스템 -->
+<section class="section" id="combat">
+<div class="inner">
+  <div class="section-label">08 · COMBAT SYSTEM</div>
+  <h2 class="section-title">전투 시스템</h2>
+  <div class="lead-box">
+    각 캐릭터는 3개 스킬 슬롯 보유. <strong>SkillData는 List&lt;SkillAction&gt;의 조합</strong>으로 구성되어<br>
+    "Dash → Melee" 같은 복합 액션을 자유롭게 만들 수 있습니다.
+  </div>
+  <div class="diagram-wrap fade-in"><svg viewBox="0 0 700 370" xmlns="http://www.w3.org/2000/svg">
+        <text x="20" y="25" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#888" letter-spacing="2">SKILL SLOTS</text>
+        <text x="20" y="48" font-family="Malgun Gothic" font-size="14" font-weight="800" fill="#1a1a1a">3개의 스킬 슬롯</text>
+
+        <g transform="translate(20, 60)">
+          <rect width="200" height="65" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+          <rect x="10" y="10" width="36" height="45" rx="4" fill="#7c3aed"/>
+          <text x="28" y="40" font-family="Consolas, monospace" font-size="22" font-weight="800" fill="white" text-anchor="middle">0</text>
+          <text x="58" y="28" font-family="Malgun Gothic" font-size="11.5" font-weight="700" fill="#5b21b6">기본 공격</text>
+          <text x="58" y="44" font-family="Consolas, monospace" font-size="9" fill="#7c3aed">마우스 좌클릭 / 터치</text>
+          <text x="58" y="58" font-family="Malgun Gothic" font-size="8.5" fill="#888">캐릭터별 무기</text>
+        </g>
+
+        <g transform="translate(240, 60)">
+          <rect width="200" height="65" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+          <rect x="10" y="10" width="36" height="45" rx="4" fill="#2563eb"/>
+          <text x="28" y="40" font-family="Consolas, monospace" font-size="22" font-weight="800" fill="white" text-anchor="middle">1</text>
+          <text x="58" y="28" font-family="Malgun Gothic" font-size="11.5" font-weight="700" fill="#1e40af">스킬1 (슈퍼)</text>
+          <text x="58" y="44" font-family="Consolas, monospace" font-size="9" fill="#2563eb">Q 키 / 슈퍼 버튼</text>
+          <text x="58" y="58" font-family="Malgun Gothic" font-size="8.5" fill="#888">강력한 메인 스킬</text>
+        </g>
+
+        <g transform="translate(460, 60)">
+          <rect width="220" height="65" rx="6" fill="#fed7aa" stroke="#ea580c" stroke-width="2"/>
+          <rect x="10" y="10" width="36" height="45" rx="4" fill="#ea580c"/>
+          <text x="28" y="40" font-family="Consolas, monospace" font-size="22" font-weight="800" fill="white" text-anchor="middle">2</text>
+          <text x="58" y="28" font-family="Malgun Gothic" font-size="11.5" font-weight="700" fill="#c2410c">스킬2 (가젯)</text>
+          <text x="58" y="44" font-family="Consolas, monospace" font-size="9" fill="#ea580c">E 키 / 가젯 버튼</text>
+          <text x="58" y="58" font-family="Malgun Gothic" font-size="8.5" fill="#888">짧은 쿨다운 보조 스킬</text>
+        </g>
+
+        <text x="20" y="160" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#888" letter-spacing="2">COOLDOWN VERIFICATION</text>
+        <text x="20" y="183" font-family="Malgun Gothic" font-size="14" font-weight="800" fill="#1a1a1a">쿨다운 이중 검증</text>
+
+        <g transform="translate(20, 195)">
+          <rect width="170" height="85" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+          <text x="85" y="22" font-family="Malgun Gothic" font-size="11.5" font-weight="700" fill="#5b21b6" text-anchor="middle">클라이언트 쿨다운</text>
+          <text x="85" y="42" font-family="Malgun Gothic" font-size="9.5" fill="#7c3aed" text-anchor="middle">UX (즉각 반응)</text>
+          <line x1="20" y1="52" x2="150" y2="52" stroke="#c4b5fd" stroke-width="1"/>
+          <text x="85" y="68" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">버튼 즉시 비활성화</text>
+          <text x="85" y="80" font-family="Malgun Gothic" font-size="8.5" fill="#888" text-anchor="middle">유저는 빠른 피드백</text>
+        </g>
+
+        <text x="208" y="245" font-family="Consolas, monospace" font-size="26" font-weight="800" fill="#7c3aed" text-anchor="middle">+</text>
+
+        <g transform="translate(230, 195)">
+          <rect width="170" height="85" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
+          <text x="85" y="22" font-family="Malgun Gothic" font-size="11.5" font-weight="700" fill="#047857" text-anchor="middle">서버 쿨다운</text>
+          <text x="85" y="42" font-family="Malgun Gothic" font-size="9.5" fill="#059669" text-anchor="middle">실제 판정 (치트 방지)</text>
+          <line x1="20" y1="52" x2="150" y2="52" stroke="#6ee7b7" stroke-width="1"/>
+          <text x="85" y="68" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">최종 발동 여부 결정</text>
+          <text x="85" y="80" font-family="Malgun Gothic" font-size="8.5" fill="#888" text-anchor="middle">조작 불가능</text>
+        </g>
+
+        <text x="418" y="245" font-family="Consolas, monospace" font-size="26" font-weight="800" fill="#7c3aed" text-anchor="middle">+</text>
+
+        <g transform="translate(440, 195)">
+          <rect width="240" height="85" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+          <text x="120" y="22" font-family="Malgun Gothic" font-size="11.5" font-weight="700" fill="#92400e" text-anchor="middle">입력 버퍼 (0.15초)</text>
+          <text x="120" y="42" font-family="Malgun Gothic" font-size="9.5" fill="#d97706" text-anchor="middle">반응성 향상</text>
+          <line x1="20" y1="52" x2="220" y2="52" stroke="#fcd34d" stroke-width="1"/>
+          <text x="120" y="68" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">쿨다운 직전 입력도 보존</text>
+          <text x="120" y="80" font-family="Malgun Gothic" font-size="8.5" fill="#888" text-anchor="middle">버튼 연타 시 자연스러운 발동</text>
+        </g>
+
+        <text x="20" y="310" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#888" letter-spacing="2">ATTACK TYPES &amp; PROJECTILES</text>
+
+        <g transform="translate(20, 320)">
+          <rect width="135" height="45" rx="4" fill="white" stroke="#7c3aed" stroke-width="1.5"/>
+          <text x="67.5" y="20" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#7c3aed" text-anchor="middle">MELEE</text>
+          <text x="67.5" y="35" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">근거리 히트박스</text>
+        </g>
+        <g transform="translate(165, 320)">
+          <rect width="135" height="45" rx="4" fill="white" stroke="#2563eb" stroke-width="1.5"/>
+          <text x="67.5" y="20" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#2563eb" text-anchor="middle">PROJECTILE</text>
+          <text x="67.5" y="35" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">발사체 (직선/반사/폭발)</text>
+        </g>
+        <g transform="translate(310, 320)">
+          <rect width="135" height="45" rx="4" fill="white" stroke="#ea580c" stroke-width="1.5"/>
+          <text x="67.5" y="20" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#ea580c" text-anchor="middle">DASH</text>
+          <text x="67.5" y="35" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">돌진 + 이동 억제</text>
+        </g>
+
+        <g transform="translate(460, 305)">
+          <rect width="220" height="60" rx="4" fill="#fafafa" stroke="#e5e7eb" stroke-width="1"/>
+          <text x="110" y="18" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#888" text-anchor="middle">PROJECTILE INHERITANCE</text>
+          <text x="15" y="35" font-family="Consolas, monospace" font-size="9" fill="#7c3aed"><tspan font-weight="700">ProjectileBase</tspan></text>
+          <text x="25" y="48" font-family="Consolas, monospace" font-size="8.5" fill="#555">├─ BouncingProjectile</text>
+          <text x="25" y="58" font-family="Consolas, monospace" font-size="8.5" fill="#555">└─ ExplosiveProjectile</text>
+        </g>
+      </svg></div>
+  <div class="cards-3">
+    <div class="card accent"><div class="card-label">스킬 조합</div><div class="card-value"><code>SkillData(cooldown + List&lt;SkillAction&gt;)</code>로 복합 액션 구성. 예: Dash → Melee</div></div>
+    <div class="card green"><div class="card-label">이중 검증 효과</div><div class="card-value">클라 쿨다운만 있으면 조작 가능. 서버 쿨다운으로 실제 발동 차단</div></div>
+    <div class="card orange"><div class="card-label">입력 버퍼</div><div class="card-value">0.15초 보존으로 쿨다운 직전 입력도 발동. 체감 반응성 크게 향상</div></div>
+  </div>
+</div>
+</section>
+
+<!-- 09. 전투 판정 & 결과 -->
+<section class="section" id="result">
+<div class="inner">
+  <div class="section-label">09 · MATCH RESULT</div>
+  <h2 class="section-title">전투 판정 & 결과</h2>
+  <div class="lead-box">
+    180초 동안 <strong>팀 전멸</strong> 또는 <strong>HP 비율 합산</strong>으로 승패 결정.<br>
+    단순 생존자 수 비교가 아닌 HP 비율 방식으로 운빨 요소를 줄였습니다.
+  </div>
+  <div class="diagram-wrap fade-in"><svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg">
+        <text x="20" y="25" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#888" letter-spacing="2">VICTORY CONDITIONS · 승패 조건</text>
+
+        <g transform="translate(20, 45)">
+          <rect width="320" height="125" rx="6" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+          <circle cx="35" cy="35" r="20" fill="#dc2626"/>
+          <text x="35" y="42" font-family="Malgun Gothic" font-size="20" font-weight="800" fill="white" text-anchor="middle">!</text>
+          <text x="70" y="32" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#dc2626" letter-spacing="2">INSTANT</text>
+          <text x="70" y="50" font-family="Malgun Gothic" font-size="14" font-weight="800" fill="#1a1a1a">즉시 종료</text>
+          <line x1="20" y1="65" x2="300" y2="65" stroke="#fecaca" stroke-width="1"/>
+          <text x="20" y="85" font-family="Malgun Gothic" font-size="10.5" fill="#555">한 팀이 전멸하면 즉시 종료</text>
+          <text x="20" y="103" font-family="Malgun Gothic" font-size="10.5" fill="#555">생존한 팀이 승리</text>
+          <text x="20" y="115" font-family="Malgun Gothic" font-size="9" fill="#888" font-style="italic">가장 흔한 종료 케이스</text>
+        </g>
+
+        <g transform="translate(360, 45)">
+          <rect width="320" height="125" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+          <circle cx="35" cy="35" r="20" fill="#2563eb"/>
+          <text x="35" y="42" font-family="Malgun Gothic" font-size="18" font-weight="800" fill="white" text-anchor="middle">T</text>
+          <text x="70" y="32" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#2563eb" letter-spacing="2">TIMEOUT (180s)</text>
+          <text x="70" y="50" font-family="Malgun Gothic" font-size="14" font-weight="800" fill="#1a1a1a">타임오버</text>
+          <line x1="20" y1="65" x2="300" y2="65" stroke="#bfdbfe" stroke-width="1"/>
+          <text x="20" y="85" font-family="Malgun Gothic" font-size="10.5" fill="#555"><tspan font-weight="700">팀 HP 비율 합산</tspan>이 높은 팀 승리</text>
+          <text x="20" y="103" font-family="Malgun Gothic" font-size="10.5" fill="#555">차이 1% 이하면 무승부</text>
+          <text x="20" y="115" font-family="Malgun Gothic" font-size="9" fill="#888" font-style="italic">단순 생존자 수 비교가 아님</text>
+        </g>
+
+        <text x="20" y="200" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#888" letter-spacing="2">RESULT FLOW · 결과 전달 흐름</text>
+
+        <g transform="translate(20, 220)">
+          <rect width="660" height="135" rx="6" fill="#fafafa" stroke="#e5e7eb" stroke-width="1"/>
+
+          <g transform="translate(15, 20)">
+            <rect width="140" height="95" rx="4" fill="white" stroke="#ea580c" stroke-width="1.5"/>
+            <text x="70" y="18" font-family="Consolas, monospace" font-size="8.5" font-weight="700" fill="#ea580c" text-anchor="middle" letter-spacing="1">SERVER</text>
+            <text x="70" y="38" font-family="Malgun Gothic" font-size="11" font-weight="700" fill="#1a1a1a" text-anchor="middle">EndBattle()</text>
+            <line x1="20" y1="46" x2="120" y2="46" stroke="#fed7aa" stroke-width="1"/>
+            <text x="70" y="62" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">킬 / 데스 / 딜량</text>
+            <text x="70" y="76" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">집계 완료</text>
+            <text x="70" y="89" font-family="Consolas, monospace" font-size="8" fill="#888" text-anchor="middle">ExpCalculator</text>
+          </g>
+
+          <polygon points="165,67 175,62 175,72" fill="#888"/>
+          <line x1="155" y1="67" x2="170" y2="67" stroke="#888" stroke-width="1.5"/>
+
+          <g transform="translate(180, 20)">
+            <rect width="150" height="95" rx="4" fill="white" stroke="#059669" stroke-width="1.5"/>
+            <text x="75" y="18" font-family="Consolas, monospace" font-size="8.5" font-weight="700" fill="#059669" text-anchor="middle" letter-spacing="1">BACKEND</text>
+            <text x="75" y="38" font-family="Malgun Gothic" font-size="11" font-weight="700" fill="#1a1a1a" text-anchor="middle">ReportMatchResult</text>
+            <line x1="20" y1="46" x2="130" y2="46" stroke="#a7f3d0" stroke-width="1"/>
+            <text x="75" y="62" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">전투 결과 DB 저장</text>
+            <text x="75" y="76" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">경험치 · 랭크 갱신</text>
+            <text x="75" y="89" font-family="Consolas, monospace" font-size="8" fill="#888" text-anchor="middle">POST /battle-result</text>
+          </g>
+
+          <polygon points="340,67 350,62 350,72" fill="#888"/>
+          <line x1="330" y1="67" x2="345" y2="67" stroke="#888" stroke-width="1.5"/>
+
+          <g transform="translate(355, 20)">
+            <rect width="140" height="95" rx="4" fill="white" stroke="#7c3aed" stroke-width="1.5"/>
+            <text x="70" y="18" font-family="Consolas, monospace" font-size="8.5" font-weight="700" fill="#7c3aed" text-anchor="middle" letter-spacing="1">CLIENT</text>
+            <text x="70" y="38" font-family="Malgun Gothic" font-size="11" font-weight="700" fill="#1a1a1a" text-anchor="middle">RpcShowResult</text>
+            <line x1="20" y1="46" x2="120" y2="46" stroke="#c4b5fd" stroke-width="1"/>
+            <text x="70" y="62" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">결과 UI 표시</text>
+            <text x="70" y="76" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">로비 씬 사전 로드</text>
+            <text x="70" y="89" font-family="Consolas, monospace" font-size="8" fill="#888" text-anchor="middle">+ Preload Lobby</text>
+          </g>
+
+          <polygon points="505,67 515,62 515,72" fill="#888"/>
+          <line x1="495" y1="67" x2="510" y2="67" stroke="#888" stroke-width="1.5"/>
+
+          <g transform="translate(520, 20)">
+            <rect width="125" height="95" rx="4" fill="white" stroke="#2563eb" stroke-width="1.5"/>
+            <text x="62.5" y="18" font-family="Consolas, monospace" font-size="8.5" font-weight="700" fill="#2563eb" text-anchor="middle" letter-spacing="1">CLEANUP</text>
+            <text x="62.5" y="38" font-family="Malgun Gothic" font-size="11" font-weight="700" fill="#1a1a1a" text-anchor="middle">ReleasePort</text>
+            <line x1="15" y1="46" x2="110" y2="46" stroke="#93c5fd" stroke-width="1"/>
+            <text x="62.5" y="62" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">포트 풀에 반환</text>
+            <text x="62.5" y="76" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">10초 후 자동</text>
+            <text x="62.5" y="89" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">로비 복귀</text>
+          </g>
+        </g>
+      </svg></div>
+  <div class="cards-3">
+    <div class="card blue"><div class="card-label">HP 비율 판정</div><div class="card-value">팀 HP 비율 합산이 더 공정. 마지막까지 전략적으로 싸울 이유를 만듦</div></div>
+    <div class="card green"><div class="card-label">집계 데이터</div><div class="card-value">킬·데스·딜량을 서버가 실시간 추적. <code>ExpCalculator</code>로 경험치 산출</div></div>
+    <div class="card accent"><div class="card-label">자원 회수</div><div class="card-value">매치 종료 → 포트 반환 → 다음 매치가 즉시 해당 포트 사용 가능</div></div>
+  </div>
+</div>
+</section>
+
+<!-- 10. 캐릭터 데이터 구조 -->
+<section class="section" id="data">
+<div class="inner">
+  <div class="section-label">10 · DATA SEPARATION</div>
+  <h2 class="section-title">캐릭터 데이터 구조</h2>
+  <div class="lead-box">
+    ScriptableObject를 <strong>로비용 / 전투용</strong> 두 가지로 분리.<br>
+    전투 데이터 변경이 로비 UI에 영향 없고, 컴파일 없이 밸런싱 작업이 가능합니다.
+  </div>
+  <div class="diagram-wrap fade-in"><svg viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ar-link-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker>
+        </defs>
+
+        <g transform="translate(30, 30)">
+          <rect width="280" height="290" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+          <rect x="0" y="0" width="280" height="40" rx="8" fill="#7c3aed"/>
+          <text x="20" y="26" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="white" letter-spacing="2">LOBBY · UI · 서버 인증용</text>
+          <text x="20" y="68" font-family="Consolas, monospace" font-size="14" font-weight="800" fill="#5b21b6">CharacterRawData</text>
+          <text x="20" y="86" font-family="Consolas, monospace" font-size="10" fill="#7c3aed">CharacterTableSO</text>
+
+          <line x1="20" y1="100" x2="260" y2="100" stroke="#c4b5fd" stroke-width="1"/>
+
+          <text x="20" y="125" font-family="Consolas, monospace" font-size="10" fill="#1a1a1a"><tspan font-weight="700">id, name, icon</tspan></text>
+          <text x="30" y="138" font-family="Malgun Gothic" font-size="8.5" fill="#888">캐릭터 식별 · 표시 정보</text>
+
+          <text x="20" y="160" font-family="Consolas, monospace" font-size="10" fill="#1a1a1a"><tspan font-weight="700">baseHp / baseAtk / baseDef</tspan></text>
+          <text x="30" y="173" font-family="Malgun Gothic" font-size="8.5" fill="#888">기본 스탯 (1레벨 기준)</text>
+
+          <text x="20" y="195" font-family="Consolas, monospace" font-size="10" fill="#1a1a1a"><tspan font-weight="700">강화 배율 (atkUpgradeBonus)</tspan></text>
+          <text x="30" y="208" font-family="Malgun Gothic" font-size="8.5" fill="#888">레벨업 시 증가량</text>
+
+          <text x="20" y="230" font-family="Consolas, monospace" font-size="10" fill="#1a1a1a"><tspan font-weight="700">CharacterType</tspan></text>
+          <text x="30" y="243" font-family="Malgun Gothic" font-size="8.5" fill="#888">탱커 / 딜러 / 서포터</text>
+
+          <rect x="20" y="255" width="240" height="22" rx="3" fill="white" stroke="#7c3aed" stroke-width="1.5"/>
+          <text x="140" y="269" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#7c3aed" text-anchor="middle">battleData → CharacterDataSO</text>
+        </g>
+
+        <line x1="280" y1="180" x2="395" y2="180" stroke="#7c3aed" stroke-width="2" marker-end="url(#ar-link-c)"/>
+        <text x="337" y="170" font-family="Malgun Gothic" font-size="9" font-weight="700" fill="#7c3aed" text-anchor="middle">참조</text>
+        <text x="337" y="195" font-family="Malgun Gothic" font-size="8" fill="#888" text-anchor="middle" font-style="italic">필요할 때만 로드</text>
+
+        <g transform="translate(395, 30)">
+          <rect width="275" height="290" rx="8" fill="#fed7aa" stroke="#ea580c" stroke-width="2"/>
+          <rect x="0" y="0" width="275" height="40" rx="8" fill="#ea580c"/>
+          <text x="20" y="26" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="white" letter-spacing="2">BATTLE · 전투 메카닉 전용</text>
+          <text x="20" y="68" font-family="Consolas, monospace" font-size="14" font-weight="800" fill="#c2410c">CharacterDataSO</text>
+          <text x="20" y="86" font-family="Malgun Gothic" font-size="10" fill="#ea580c">전투 시점에만 필요</text>
+
+          <line x1="20" y1="100" x2="255" y2="100" stroke="#fed7aa" stroke-width="1"/>
+
+          <text x="20" y="125" font-family="Consolas, monospace" font-size="10" fill="#1a1a1a"><tspan font-weight="700">weaponMeshPrefab</tspan></text>
+          <text x="30" y="138" font-family="Malgun Gothic" font-size="8.5" fill="#888">무기 3D 모델</text>
+
+          <text x="20" y="160" font-family="Consolas, monospace" font-size="10" fill="#1a1a1a"><tspan font-weight="700">basicAttack</tspan>  (AttackDataSO)</text>
+          <text x="30" y="173" font-family="Malgun Gothic" font-size="8.5" fill="#888">기본 공격 데이터</text>
+
+          <text x="20" y="195" font-family="Consolas, monospace" font-size="10" fill="#1a1a1a"><tspan font-weight="700">skill1Attack</tspan>  (AttackDataSO)</text>
+          <text x="30" y="208" font-family="Malgun Gothic" font-size="8.5" fill="#888">슈퍼 스킬 데이터</text>
+
+          <text x="20" y="230" font-family="Consolas, monospace" font-size="10" fill="#1a1a1a"><tspan font-weight="700">skill2Attack</tspan>  (AttackDataSO?)</text>
+          <text x="30" y="243" font-family="Malgun Gothic" font-size="8.5" fill="#888">가젯 스킬 (nullable)</text>
+
+          <rect x="20" y="260" width="235" height="20" rx="3" fill="white" stroke="#ea580c" stroke-width="1"/>
+          <text x="137.5" y="273" font-family="Consolas, monospace" font-size="8.5" fill="#c2410c" text-anchor="middle">발사체 · 히트박스 · 이펙트 참조</text>
+        </g>
+      </svg></div>
+  <div class="cards-3">
+    <div class="card accent"><div class="card-label">로비/UI 측 SO</div><div class="card-value">자주 안 바뀜. 캐릭터 카드, 인벤토리, 스탯 표시에 사용</div></div>
+    <div class="card orange"><div class="card-label">전투 메카닉 SO</div><div class="card-value">자주 바뀜. 발사체·데미지·쿨다운 등 밸런싱 시 수정</div></div>
+    <div class="card green"><div class="card-label">분리 효과</div><div class="card-value">전투 SO 수정 시 로비 UI 코드 영향 0. 컴파일 없이 밸런싱 가능</div></div>
+  </div>
+</div>
+</section>
+
+<!-- 11. 인벤토리 -->
+<section class="section" id="inventory">
+<div class="inner">
+  <div class="section-label">11 · INVENTORY</div>
+  <h2 class="section-title">인벤토리 & 강화</h2>
+  <div class="lead-box">
+    드래그&드롭 장비 장착, 강화, 초월 기능 제공.<br>
+    장비 변경 시 <strong>StatUtils.Calculate</strong>가 즉시 재계산되어 UI 스탯이 실시간 갱신됩니다.
+  </div>
+  <div class="diagram-wrap fade-in"><svg viewBox="0 0 700 370" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ar-data-i" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker>
+        </defs>
+
+        <text x="20" y="25" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#888" letter-spacing="2">DATA FLOW · 데이터 흐름</text>
+
+        <g transform="translate(20, 45)">
+          <rect width="140" height="80" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
+          <text x="70" y="22" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#059669" text-anchor="middle" letter-spacing="2">1. SERVER</text>
+          <text x="70" y="42" font-family="Malgun Gothic" font-size="11.5" font-weight="700" fill="#047857" text-anchor="middle">로그인 응답</text>
+          <line x1="15" y1="50" x2="125" y2="50" stroke="#a7f3d0" stroke-width="1"/>
+          <text x="70" y="65" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">userData JSON</text>
+          <text x="70" y="76" font-family="Consolas, monospace" font-size="8" fill="#888" text-anchor="middle">characters, items</text>
+        </g>
+
+        <line x1="162" y1="85" x2="180" y2="85" stroke="#7c3aed" stroke-width="2" marker-end="url(#ar-data-i)"/>
+
+        <g transform="translate(182, 45)">
+          <rect width="140" height="80" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+          <text x="70" y="22" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#7c3aed" text-anchor="middle" letter-spacing="2">2. PARSE</text>
+          <text x="70" y="42" font-family="Malgun Gothic" font-size="11.5" font-weight="700" fill="#5b21b6" text-anchor="middle">데이터 매니저</text>
+          <line x1="15" y1="50" x2="125" y2="50" stroke="#c4b5fd" stroke-width="1"/>
+          <text x="70" y="65" font-family="Consolas, monospace" font-size="9" fill="#555" text-anchor="middle">ApplyUserData()</text>
+          <text x="70" y="76" font-family="Consolas, monospace" font-size="8" fill="#888" text-anchor="middle">PlayerDataManager</text>
+        </g>
+
+        <line x1="324" y1="85" x2="342" y2="85" stroke="#7c3aed" stroke-width="2" marker-end="url(#ar-data-i)"/>
+
+        <g transform="translate(344, 45)">
+          <rect width="140" height="80" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+          <text x="70" y="22" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#2563eb" text-anchor="middle" letter-spacing="2">3. RUNTIME</text>
+          <text x="70" y="42" font-family="Malgun Gothic" font-size="11.5" font-weight="700" fill="#1e40af" text-anchor="middle">런타임 인벤토리</text>
+          <line x1="15" y1="50" x2="125" y2="50" stroke="#93c5fd" stroke-width="1"/>
+          <text x="70" y="65" font-family="Consolas, monospace" font-size="9" fill="#555" text-anchor="middle">PlayerInventory</text>
+          <text x="70" y="76" font-family="Malgun Gothic" font-size="8.5" fill="#888" text-anchor="middle">실제 보유 아이템</text>
+        </g>
+
+        <line x1="486" y1="85" x2="504" y2="85" stroke="#7c3aed" stroke-width="2" marker-end="url(#ar-data-i)"/>
+
+        <g transform="translate(506, 45)">
+          <rect width="170" height="80" rx="6" fill="#fed7aa" stroke="#ea580c" stroke-width="2"/>
+          <text x="85" y="22" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#ea580c" text-anchor="middle" letter-spacing="2">4. UI</text>
+          <text x="85" y="42" font-family="Malgun Gothic" font-size="11.5" font-weight="700" fill="#c2410c" text-anchor="middle">InventoryUI</text>
+          <line x1="15" y1="50" x2="155" y2="50" stroke="#fdba74" stroke-width="1"/>
+          <text x="85" y="65" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">CharacterUIModel 바인딩</text>
+          <text x="85" y="76" font-family="Malgun Gothic" font-size="8.5" fill="#888" text-anchor="middle">드래그&드롭 · 강화 · 초월</text>
+        </g>
+
+        <text x="20" y="170" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#888" letter-spacing="2">FEATURES · 주요 기능</text>
+
+        <g transform="translate(20, 190)">
+          <rect width="210" height="160" rx="6" fill="#fafafa" stroke="#e5e7eb" stroke-width="1"/>
+          <circle cx="35" cy="30" r="18" fill="#7c3aed"/>
+          <text x="35" y="36" font-family="Malgun Gothic" font-size="12" font-weight="800" fill="white" text-anchor="middle">D&amp;D</text>
+          <text x="65" y="28" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#7c3aed" letter-spacing="1">DRAG &amp; DROP</text>
+          <text x="65" y="44" font-family="Malgun Gothic" font-size="12" font-weight="700" fill="#1a1a1a">장착 / 해제</text>
+          <line x1="15" y1="58" x2="195" y2="58" stroke="#e5e7eb" stroke-width="1"/>
+          <text x="20" y="78" font-family="Malgun Gothic" font-size="9.5" fill="#555">아이템 드래그&드롭으로</text>
+          <text x="20" y="92" font-family="Malgun Gothic" font-size="9.5" fill="#555">캐릭터에 장비 장착</text>
+          <text x="20" y="115" font-family="Malgun Gothic" font-size="9" fill="#888">장착 변경 시 스탯 즉시 재계산</text>
+          <text x="20" y="130" font-family="Consolas, monospace" font-size="8.5" fill="#7c3aed">StatUtils.Calculate()</text>
+          <text x="20" y="148" font-family="Malgun Gothic" font-size="9" fill="#888">UI 실시간 갱신</text>
+        </g>
+
+        <g transform="translate(245, 190)">
+          <rect width="210" height="160" rx="6" fill="#fafafa" stroke="#e5e7eb" stroke-width="1"/>
+          <circle cx="35" cy="30" r="18" fill="#059669"/>
+          <text x="35" y="37" font-family="Malgun Gothic" font-size="16" font-weight="800" fill="white" text-anchor="middle">+</text>
+          <text x="65" y="28" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#059669" letter-spacing="1">ENHANCE</text>
+          <text x="65" y="44" font-family="Malgun Gothic" font-size="12" font-weight="700" fill="#1a1a1a">강화</text>
+          <line x1="15" y1="58" x2="195" y2="58" stroke="#e5e7eb" stroke-width="1"/>
+          <text x="20" y="78" font-family="Malgun Gothic" font-size="9.5" fill="#555">캐릭터 레벨 상승</text>
+          <text x="20" y="92" font-family="Malgun Gothic" font-size="9.5" fill="#555">기본 스탯 증가</text>
+          <text x="20" y="115" font-family="Malgun Gothic" font-size="9" fill="#888">강화 배율 적용</text>
+          <text x="20" y="130" font-family="Consolas, monospace" font-size="8.5" fill="#059669">atkUpgradeBonus 등</text>
+          <text x="20" y="148" font-family="Consolas, monospace" font-size="9" fill="#888">EnhancePanel</text>
+        </g>
+
+        <g transform="translate(470, 190)">
+          <rect width="210" height="160" rx="6" fill="#fafafa" stroke="#e5e7eb" stroke-width="1"/>
+          <circle cx="35" cy="30" r="18" fill="#ea580c"/>
+          <text x="35" y="37" font-family="Malgun Gothic" font-size="16" font-weight="800" fill="white" text-anchor="middle">*</text>
+          <text x="65" y="28" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#ea580c" letter-spacing="1">TRANSCEND</text>
+          <text x="65" y="44" font-family="Malgun Gothic" font-size="12" font-weight="700" fill="#1a1a1a">초월</text>
+          <line x1="15" y1="58" x2="195" y2="58" stroke="#e5e7eb" stroke-width="1"/>
+          <text x="20" y="78" font-family="Malgun Gothic" font-size="9.5" fill="#555">캐릭터 한계 돌파</text>
+          <text x="20" y="92" font-family="Malgun Gothic" font-size="9.5" fill="#555">추가 스탯 부여</text>
+          <text x="20" y="115" font-family="Malgun Gothic" font-size="9" fill="#888">고급 진화 시스템</text>
+          <text x="20" y="130" font-family="Consolas, monospace" font-size="8.5" fill="#ea580c">최상위 강화 단계</text>
+          <text x="20" y="148" font-family="Consolas, monospace" font-size="9" fill="#888">TranscendPanel</text>
+        </g>
+      </svg></div>
+  <div class="cards-3">
+    <div class="card accent"><div class="card-label">실시간 반영</div><div class="card-value">장착 변경 시 <code>StatUtils</code> 재계산 → UI 즉시 갱신. 서버 통신 없이 미리보기</div></div>
+    <div class="card green"><div class="card-label">서버 동기화</div><div class="card-value">강화/초월 확정 시 백엔드 API 호출 → DB 반영 → 결과 동기화</div></div>
+    <div class="card blue"><div class="card-label">데이터 모델</div><div class="card-value"><code>PlayerInventory</code>가 런타임 진실. <code>CharacterUIModel</code>이 UI에 바인딩</div></div>
+  </div>
+</div>
+</section>
+
+<!-- 12. 가챠 -->
+<section class="section" id="gacha">
+<div class="inner">
+  <div class="section-label">12 · GACHA</div>
+  <h2 class="section-title">가챠 시스템</h2>
+  <div class="lead-box">
+    <strong>로직 · 연출 · UI</strong>를 명확히 분리한 4-컴포넌트 구조.<br>
+    Unity Timeline으로 연출을 제어해 연출 변경이 로직에 영향을 주지 않습니다.
+  </div>
+  <div class="diagram-wrap fade-in"><svg viewBox="0 0 700 370" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ar-flow-g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker>
+        </defs>
+
+        <g transform="translate(30, 30)">
+          <rect width="170" height="100" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
+          <ellipse cx="40" cy="35" rx="20" ry="8" fill="none" stroke="#059669" stroke-width="2"/>
+          <path d="M 20 35 L 20 60 Q 20 68 40 68 Q 60 68 60 60 L 60 35" fill="none" stroke="#059669" stroke-width="2"/>
+          <ellipse cx="40" cy="45" rx="20" ry="8" fill="none" stroke="#059669" stroke-width="1.5"/>
+          <ellipse cx="40" cy="55" rx="20" ry="8" fill="none" stroke="#059669" stroke-width="1.5"/>
+          <text x="70" y="30" font-family="Consolas, monospace" font-size="8.5" font-weight="700" fill="#059669" letter-spacing="1">DATA</text>
+          <text x="70" y="48" font-family="Malgun Gothic" font-size="11" font-weight="700" fill="#047857">보상 테이블</text>
+          <text x="70" y="62" font-family="Consolas, monospace" font-size="8.5" fill="#059669">GachaReward</text>
+          <text x="70" y="74" font-family="Consolas, monospace" font-size="8.5" fill="#059669">Database</text>
+          <text x="20" y="92" font-family="Malgun Gothic" font-size="8.5" fill="#888" font-style="italic">ScriptableObject</text>
+        </g>
+
+        <line x1="200" y1="80" x2="240" y2="80" stroke="#7c3aed" stroke-width="2" marker-end="url(#ar-flow-g)"/>
+        <text x="220" y="72" font-family="Malgun Gothic" font-size="8" fill="#7c3aed" text-anchor="middle">참조</text>
+
+        <g transform="translate(245, 30)">
+          <rect width="180" height="100" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="3"/>
+          <text x="90" y="20" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#7c3aed" text-anchor="middle" letter-spacing="2">LOGIC</text>
+          <circle cx="40" cy="55" r="22" fill="none" stroke="#7c3aed" stroke-width="3"/>
+          <circle cx="40" cy="55" r="6" fill="#7c3aed"/>
+          <text x="80" y="48" font-family="Malgun Gothic" font-size="12" font-weight="800" fill="#5b21b6">GachaContext</text>
+          <text x="80" y="63" font-family="Malgun Gothic" font-size="9" fill="#888">확률 · 보상 산출</text>
+          <text x="80" y="76" font-family="Malgun Gothic" font-size="8.5" fill="#888" font-style="italic">가챠 로직 총괄</text>
+        </g>
+
+        <line x1="335" y1="130" x2="335" y2="160" stroke="#7c3aed" stroke-width="2"/>
+        <line x1="170" y1="160" x2="500" y2="160" stroke="#7c3aed" stroke-width="2"/>
+        <line x1="170" y1="160" x2="170" y2="195" stroke="#7c3aed" stroke-width="2" marker-end="url(#ar-flow-g)"/>
+        <line x1="500" y1="160" x2="500" y2="195" stroke="#7c3aed" stroke-width="2" marker-end="url(#ar-flow-g)"/>
+
+        <g transform="translate(60, 200)">
+          <rect width="220" height="120" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+          <circle cx="35" cy="35" r="20" fill="#2563eb"/>
+          <polygon points="29,28 29,42 43,35" fill="white"/>
+          <text x="65" y="28" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#2563eb" letter-spacing="1">PRESENTATION</text>
+          <text x="65" y="46" font-family="Malgun Gothic" font-size="12" font-weight="700" fill="#1e40af">연출</text>
+          <line x1="15" y1="60" x2="205" y2="60" stroke="#93c5fd" stroke-width="1"/>
+          <text x="20" y="78" font-family="Consolas, monospace" font-size="9.5" fill="#1e40af"><tspan font-weight="700">GachaTimelineController</tspan></text>
+          <text x="20" y="95" font-family="Malgun Gothic" font-size="9" fill="#555">Unity Timeline 시퀀스 제어</text>
+          <text x="20" y="108" font-family="Malgun Gothic" font-size="9" fill="#555">카메라 · 이펙트 · 사운드</text>
+        </g>
+
+        <g transform="translate(400, 200)">
+          <rect width="220" height="120" rx="6" fill="#fed7aa" stroke="#ea580c" stroke-width="2"/>
+          <circle cx="35" cy="35" r="20" fill="#ea580c"/>
+          <rect x="25" y="27" width="20" height="16" rx="2" fill="white"/>
+          <text x="65" y="28" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#ea580c" letter-spacing="1">UI</text>
+          <text x="65" y="46" font-family="Malgun Gothic" font-size="12" font-weight="700" fill="#c2410c">결과 표시</text>
+          <line x1="15" y1="60" x2="205" y2="60" stroke="#fdba74" stroke-width="1"/>
+          <text x="20" y="78" font-family="Consolas, monospace" font-size="9.5" fill="#c2410c"><tspan font-weight="700">GachaResultUI</tspan></text>
+          <text x="20" y="95" font-family="Malgun Gothic" font-size="9" fill="#555">결과 카드 애니메이션</text>
+          <text x="20" y="108" font-family="Malgun Gothic" font-size="9" fill="#555">획득 아이템 · 등급 표시</text>
+        </g>
+
+        <rect x="30" y="340" width="640" height="22" rx="3" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1"/>
+        <text x="350" y="354" font-family="Malgun Gothic" font-size="10" fill="#5b21b6" text-anchor="middle">
+          <tspan font-weight="700">분리 효과:</tspan> 연출 변경은 Timeline만, 보상 변경은 SO만, UI 변경은 Result만 수정 — <tspan font-weight="700">책임 명확</tspan>
+        </text>
+      </svg></div>
+  <div class="cards-3">
+    <div class="card green"><div class="card-label">데이터</div><div class="card-value">SO 기반 보상 테이블. 신규 보상 추가 시 코드 수정 없이 에디터에서 작업</div></div>
+    <div class="card accent"><div class="card-label">로직</div><div class="card-value">확률 계산과 보상 산출이 단일 클래스에 집중. 테스트 용이</div></div>
+    <div class="card blue"><div class="card-label">연출</div><div class="card-value">Unity Timeline 사용. 디자이너가 코드 없이 연출 시퀀스 수정 가능</div></div>
+  </div>
+</div>
+</section>
+
+<!-- 13. 맵 생성 -->
+<section class="section" id="map">
+<div class="inner">
+  <div class="section-label">13 · PROCEDURAL MAP</div>
+  <h2 class="section-title">맵 생성 시스템</h2>
+  <div class="lead-box">
+    바닥 · 벽 · 덤불을 <strong>각각 별도 Generator</strong>가 절차적으로 생성.<br>
+    덤불 안에 들어간 플레이어는 적에게 보이지 않는 <strong>은신 시스템</strong>이 작동합니다.
+  </div>
+  <div class="diagram-wrap fade-in"><svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg">
+        <g transform="translate(20, 20)">
+          <rect width="280" height="260" rx="6" fill="#fafafa" stroke="#e5e7eb" stroke-width="1"/>
+          <text x="20" y="22" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#888" letter-spacing="2">MAP VISUALIZATION</text>
+
+          <rect x="30" y="35" width="220" height="200" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+
+          <rect x="30" y="35" width="220" height="20" fill="#94a3b8"/>
+          <rect x="30" y="215" width="220" height="20" fill="#94a3b8"/>
+          <rect x="30" y="35" width="20" height="200" fill="#94a3b8"/>
+          <rect x="230" y="35" width="20" height="200" fill="#94a3b8"/>
+
+          <rect x="100" y="80" width="30" height="60" fill="#94a3b8"/>
+          <rect x="150" y="130" width="30" height="60" fill="#94a3b8"/>
+
+          <circle cx="80" cy="170" r="14" fill="#16a34a" opacity="0.6"/>
+          <circle cx="90" cy="160" r="11" fill="#16a34a" opacity="0.6"/>
+          <circle cx="200" cy="80" r="14" fill="#16a34a" opacity="0.6"/>
+          <circle cx="210" cy="90" r="11" fill="#16a34a" opacity="0.6"/>
+          <circle cx="140" cy="200" r="13" fill="#16a34a" opacity="0.6"/>
+
+          <circle cx="65" cy="60" r="6" fill="#7c3aed"/>
+          <text x="80" y="64" font-family="Malgun Gothic" font-size="8.5" fill="#5b21b6" font-weight="700">팀 A 스폰</text>
+          <circle cx="215" cy="215" r="6" fill="#ea580c"/>
+          <text x="200" y="219" font-family="Malgun Gothic" font-size="8.5" fill="#c2410c" font-weight="700" text-anchor="end">팀 B 스폰</text>
+
+          <rect x="30" y="245" width="10" height="10" fill="#dcfce7" stroke="#86efac"/>
+          <text x="45" y="253" font-family="Malgun Gothic" font-size="8" fill="#555">바닥</text>
+          <rect x="75" y="245" width="10" height="10" fill="#94a3b8"/>
+          <text x="90" y="253" font-family="Malgun Gothic" font-size="8" fill="#555">벽</text>
+          <circle cx="120" cy="250" r="5" fill="#16a34a" opacity="0.6"/>
+          <text x="130" y="253" font-family="Malgun Gothic" font-size="8" fill="#555">덤불(은신)</text>
+          <circle cx="175" cy="250" r="4" fill="#7c3aed"/>
+          <text x="185" y="253" font-family="Malgun Gothic" font-size="8" fill="#555">스폰</text>
+        </g>
+
+        <g transform="translate(320, 20)">
+          <text x="0" y="20" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#888" letter-spacing="2">GENERATORS</text>
+
+          <g transform="translate(0, 30)">
+            <rect width="350" height="50" rx="4" fill="#ecfdf5" stroke="#16a34a" stroke-width="1.5"/>
+            <rect x="0" y="0" width="6" height="50" fill="#16a34a"/>
+            <text x="20" y="22" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#16a34a">MapFloorGenerator</text>
+            <text x="20" y="40" font-family="Malgun Gothic" font-size="9.5" fill="#555">바닥 타일을 격자로 배치 · 맵의 기본 영역 형성</text>
+          </g>
+
+          <g transform="translate(0, 90)">
+            <rect width="350" height="50" rx="4" fill="#f1f5f9" stroke="#64748b" stroke-width="1.5"/>
+            <rect x="0" y="0" width="6" height="50" fill="#64748b"/>
+            <text x="20" y="22" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#475569">MapWallGenerator + WallGenerator</text>
+            <text x="20" y="40" font-family="Malgun Gothic" font-size="9.5" fill="#555">벽 배치 (충돌 콜라이더 포함) · 시야 차단</text>
+          </g>
+
+          <g transform="translate(0, 150)">
+            <rect width="350" height="50" rx="4" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+            <rect x="0" y="0" width="6" height="50" fill="#16a34a"/>
+            <text x="20" y="22" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#16a34a">BushGridGenerator</text>
+            <text x="20" y="40" font-family="Malgun Gothic" font-size="9.5" fill="#555">덤불 그리드 생성 · 은신 가능 구역</text>
+          </g>
+
+          <g transform="translate(0, 210)">
+            <rect width="350" height="50" rx="4" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+            <rect x="0" y="0" width="6" height="50" fill="#7c3aed"/>
+            <text x="20" y="22" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#7c3aed">SpawnManager</text>
+            <text x="20" y="40" font-family="Malgun Gothic" font-size="9.5" fill="#555">팀별 스폰 포인트 관리 (남쪽/북쪽 교대 배치)</text>
+          </g>
+        </g>
+
+        <g transform="translate(20, 300)">
+          <rect width="660" height="60" rx="6" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+          <text x="20" y="22" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#16a34a" letter-spacing="2">BUSH STEALTH · 덤불 은신 메커니즘</text>
+          <text x="20" y="42" font-family="Malgun Gothic" font-size="10" fill="#1a1a1a">
+            <tspan font-weight="700">BushZone</tspan> 콜라이더 진입 → <tspan font-weight="700">PlayerBushState</tspan> 활성화 → 렌더링 레이어 변경 → 적 시점에서 비가시화
+          </text>
+          <text x="20" y="55" font-family="Malgun Gothic" font-size="8.5" fill="#888" font-style="italic">공격 시 잠시 노출 — 위치 드러남으로 전략적 긴장감</text>
+        </g>
+      </svg></div>
+  <div class="cards-3">
+    <div class="card green"><div class="card-label">바닥 · 벽</div><div class="card-value">절차적 생성으로 다양한 맵 구성 가능. 콜라이더로 충돌 처리</div></div>
+    <div class="card orange"><div class="card-label">덤불 은신</div><div class="card-value"><code>BushZone</code> + <code>PlayerBushState</code> — 전략적 위치 선점 요소</div></div>
+    <div class="card accent"><div class="card-label">스폰</div><div class="card-value">팀별 스폰 포인트 · 매치 후 <code>ResetSpawnCounts()</code>로 포트 재사용</div></div>
+  </div>
+</div>
+</section>
+
+<!-- 14. 크로스 플랫폼 -->
+<section class="section" id="platform">
+<div class="inner">
+  <div class="section-label">14 · CROSS PLATFORM</div>
+  <h2 class="section-title">크로스 플랫폼</h2>
+  <div class="lead-box">
+    <code>IPlayerInputProvider</code> 인터페이스로 입력을 추상화.<br>
+    <strong>PlayerController는 플랫폼을 모름</strong> — 플랫폼별 분기 코드가 한 줄도 없습니다.
+  </div>
+  <div class="diagram-wrap fade-in"><svg viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ar-imp-cp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker>
+        </defs>
+
+        <g transform="translate(60, 30)">
+          <rect width="220" height="90" rx="6" fill="#fafafa" stroke="#888" stroke-width="2"/>
+          <text x="110" y="25" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#888" text-anchor="middle" letter-spacing="2">USES</text>
+          <text x="110" y="50" font-family="Consolas, monospace" font-size="15" font-weight="800" fill="#1a1a1a" text-anchor="middle">PlayerController</text>
+          <text x="110" y="68" font-family="Malgun Gothic" font-size="10" fill="#555" text-anchor="middle">인터페이스만 참조</text>
+          <text x="110" y="82" font-family="Malgun Gothic" font-size="9" fill="#7c3aed" text-anchor="middle" font-style="italic">플랫폼 분기 코드 0줄</text>
+        </g>
+
+        <line x1="280" y1="75" x2="312" y2="75" stroke="#7c3aed" stroke-width="2.5" marker-end="url(#ar-imp-cp)"/>
+        <text x="296" y="68" font-family="Consolas, monospace" font-size="8" fill="#7c3aed" text-anchor="middle">uses</text>
+
+        <g transform="translate(315, 30)">
+          <rect width="280" height="90" rx="6" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2.5"/>
+          <text x="140" y="25" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#7c3aed" text-anchor="middle" letter-spacing="2">INTERFACE</text>
+          <text x="140" y="48" font-family="Consolas, monospace" font-size="13" font-weight="800" fill="#5b21b6" text-anchor="middle">IPlayerInputProvider</text>
+          <line x1="20" y1="56" x2="260" y2="56" stroke="#c4b5fd" stroke-width="1"/>
+          <text x="30" y="72" font-family="Consolas, monospace" font-size="8.5" fill="#5b21b6">MoveInput · AttackPressed</text>
+          <text x="30" y="84" font-family="Consolas, monospace" font-size="8.5" fill="#5b21b6">Skill1Pressed · Skill2Pressed</text>
+        </g>
+
+        <line x1="430" y1="120" x2="430" y2="150" stroke="#7c3aed" stroke-width="2"/>
+        <line x1="180" y1="150" x2="680" y2="150" stroke="#7c3aed" stroke-width="2"/>
+        <line x1="180" y1="150" x2="180" y2="180" stroke="#7c3aed" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#ar-imp-cp)"/>
+        <line x1="500" y1="150" x2="500" y2="180" stroke="#7c3aed" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#ar-imp-cp)"/>
+        <text x="340" y="143" font-family="Consolas, monospace" font-size="8" fill="#7c3aed">implements</text>
+
+        <g transform="translate(60, 185)">
+          <rect width="240" height="155" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+          <rect x="15" y="20" width="40" height="30" rx="2" fill="white" stroke="#7c3aed" stroke-width="2"/>
+          <rect x="20" y="25" width="30" height="22" fill="#7c3aed"/>
+          <rect x="28" y="53" width="14" height="3" fill="#7c3aed"/>
+          <rect x="20" y="56" width="30" height="2" rx="1" fill="#7c3aed"/>
+
+          <text x="70" y="32" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#7c3aed" letter-spacing="2">PC</text>
+          <text x="70" y="52" font-family="Malgun Gothic" font-size="14" font-weight="800" fill="#5b21b6">PlayerInputHandler</text>
+          <line x1="15" y1="65" x2="225" y2="65" stroke="#c4b5fd" stroke-width="1"/>
+          <text x="20" y="84" font-family="Malgun Gothic" font-size="10" fill="#555">키보드 + 마우스</text>
+          <text x="20" y="103" font-family="Malgun Gothic" font-size="9.5" fill="#555">• WASD 이동</text>
+          <text x="20" y="118" font-family="Malgun Gothic" font-size="9.5" fill="#555">• 마우스 좌클릭 / Q / E</text>
+          <text x="20" y="133" font-family="Malgun Gothic" font-size="9.5" fill="#555">• 마우스 위치 기반 조준</text>
+        </g>
+
+        <g transform="translate(380, 185)">
+          <rect width="240" height="155" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+          <rect x="20" y="15" width="30" height="50" rx="4" fill="white" stroke="#2563eb" stroke-width="2"/>
+          <rect x="24" y="22" width="22" height="32" fill="#2563eb"/>
+          <circle cx="35" cy="60" r="2" fill="#2563eb"/>
+
+          <text x="70" y="32" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#2563eb" letter-spacing="2">MOBILE</text>
+          <text x="70" y="52" font-family="Malgun Gothic" font-size="14" font-weight="800" fill="#1e40af">MobileInputProvider</text>
+          <line x1="15" y1="65" x2="225" y2="65" stroke="#93c5fd" stroke-width="1"/>
+          <text x="20" y="84" font-family="Malgun Gothic" font-size="10" fill="#555">가상 조이스틱 + 버튼</text>
+          <text x="20" y="103" font-family="Consolas, monospace" font-size="9" fill="#555">• VirtualMovementJoystick</text>
+          <text x="20" y="118" font-family="Consolas, monospace" font-size="9" fill="#555">• VirtualJoystickButton</text>
+          <text x="20" y="133" font-family="Consolas, monospace" font-size="9" fill="#555">• MobileCombatUI</text>
+        </g>
+      </svg></div>
+  <div class="cards-3">
+    <div class="card accent"><div class="card-label">설계 원칙</div><div class="card-value">DIP(Dependency Inversion Principle) — 구체가 아닌 추상에 의존</div></div>
+    <div class="card blue"><div class="card-label">유지보수 효과</div><div class="card-value">한 플랫폼 변경이 다른 플랫폼에 영향 없음. 회귀 버그 위험 차단</div></div>
+    <div class="card green"><div class="card-label">확장성</div><div class="card-value">새 플랫폼(콘솔 등) 추가 시 인터페이스 구현만으로 대응 가능</div></div>
+  </div>
+</div>
+</section>
+
+<!-- 15. 트러블슈팅 -->
+<section class="section" id="ts">
+<div class="inner">
+  <div class="section-label">15 · TROUBLESHOOTING</div>
+  <h2 class="section-title">트러블슈팅</h2>
+  <div class="lead-box">
+    기술을 쓴다는 것과 <strong>원리를 이해한다는 것</strong>은 다릅니다.<br>
+    아래 4가지 사례는 내부 동작 원리를 직접 파악하고 구조적으로 해결한 경험입니다.
+  </div>
+
+  <div class="ts-case fade-in">
+    <div class="ts-header">
+      <div class="ts-num" style="background:#fff3e8;color:#c2410c;">01</div>
+      <div class="ts-title">투사체 터널링</div>
+      <span class="ts-badge" style="color:#c2410c;border-color:#fed7aa;background:#fff7ed;">🤖 Claude Code 에이전트</span>
+    </div>
+    <div class="ts-diagram"><svg viewBox="0 0 700 355" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr-o2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#ea580c"/>
+          </marker>
+          <marker id="arr-g2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#059669"/>
+          </marker>
+        </defs>
+
+        <!-- 문제 -->
+        <text x="20" y="22" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#dc2626" letter-spacing="2">PROBLEM · Discrete 감지 — 경로 사이를 체크하지 않음</text>
+
+        <rect x="20" y="38" width="660" height="135" rx="6" fill="#fef2f2" stroke="#fecaca"/>
+
+        <!-- Frame N -->
+        <rect x="40" y="58" width="130" height="95" rx="4" fill="white" stroke="#e5e7eb"/>
+        <text x="105" y="78" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#888" text-anchor="middle">Frame N</text>
+        <circle cx="75" cy="118" r="12" fill="#ea580c"/>
+        <rect x="120" y="75" width="12" height="65" fill="#94a3b8"/>
+        <text x="105" y="148" font-family="Consolas, monospace" font-size="8.5" fill="#555" text-anchor="middle">OnTriggerEnter: ✗</text>
+
+        <!-- 경로 (체크 안 됨) -->
+        <line x1="170" y1="118" x2="330" y2="118" stroke="#ea580c" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <text x="250" y="108" font-family="Malgun Gothic" font-size="9" fill="#dc2626" text-anchor="middle">이 경로는 체크 안 함</text>
+
+        <!-- Frame N+1 (통과 후) -->
+        <rect x="335" y="58" width="130" height="95" rx="4" fill="white" stroke="#fecaca" stroke-width="1.5"/>
+        <text x="400" y="78" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#dc2626" text-anchor="middle">Frame N+1</text>
+        <rect x="360" y="75" width="12" height="65" fill="#94a3b8"/>
+        <circle cx="435" cy="118" r="12" fill="#ea580c"/>
+        <text x="400" y="148" font-family="Malgun Gothic" font-size="8.5" fill="#dc2626" text-anchor="middle">벽 통과! 감지 못 함</text>
+
+        <text x="510" y="95" font-family="Malgun Gothic" font-size="20" fill="#dc2626">⚠</text>
+        <text x="500" y="115" font-family="Malgun Gothic" font-size="9" fill="#dc2626">속도 × deltaTime</text>
+        <text x="500" y="130" font-family="Malgun Gothic" font-size="9" fill="#dc2626">&gt; 벽 두께</text>
+
+        <!-- 해결 -->
+        <text x="20" y="205" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#059669" letter-spacing="2">SOLUTION · SphereCast — 이전~현재 위치 전체 경로 스캔</text>
+
+        <rect x="20" y="222" width="660" height="110" rx="6" fill="#ecfdf5" stroke="#a7f3d0"/>
+
+        <!-- 시작점 -->
+        <circle cx="80" cy="277" r="12" fill="#059669"/>
+        <text x="80" y="300" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">이전 위치</text>
+
+        <!-- SphereCast 범위 (원통형 sweep) -->
+        <rect x="80" y="263" width="400" height="28" rx="14" fill="rgba(5,150,105,0.1)" stroke="#059669" stroke-width="1.5" stroke-dasharray="4,2"/>
+
+        <!-- 벽 -->
+        <rect x="310" y="240" width="14" height="75" fill="#94a3b8"/>
+
+        <!-- 히트 표시 -->
+        <circle cx="308" cy="277" r="8" fill="#dc2626"/>
+        <text x="308" y="281" font-family="Malgun Gothic" font-size="9" fill="white" text-anchor="middle">!</text>
+        <text x="308" y="320" font-family="Malgun Gothic" font-size="9" fill="#dc2626" text-anchor="middle">정확한 충돌 감지</text>
+
+        <!-- 도착점 (가상) -->
+        <circle cx="480" cy="277" r="12" fill="#059669" opacity="0.3"/>
+        <text x="480" y="300" font-family="Malgun Gothic" font-size="9" fill="#888" text-anchor="middle">현재 위치</text>
+
+        <text x="80" y="325" font-family="Consolas, monospace" font-size="9" fill="#059669">Physics.SphereCast(prevPos, radius, dir, out hit, moveDistance)  →  중간 벽 감지 보장</text>
+      </svg></div>
+    <div class="ts-body">
+      <div class="ts-col"><div class="ts-col-label" style="color:#c2410c;">증상</div><div class="ts-col-text">빠른 투사체가 벽 통과. 디버그 로그로 <code>OnTriggerEnter</code>가 아예 호출 안 됨을 확인</div></div>
+      <div class="ts-col"><div class="ts-col-label" style="color:#c2410c;">원인 & 해결</div><div class="ts-col-text">Claude Code 에이전트가 코드베이스 분석 → 이산 감지 한계 파악 → SphereCast로 전체 경로 스캔</div></div>
+      <div class="ts-col"><div class="ts-col-label" style="color:#c2410c;">결과</div><div class="ts-col-text">어떤 속도에서도 벽 관통 없음. 반사 투사체의 충돌 위치도 정확히 계산</div></div>
+    </div>
+  </div>
+
+  <div class="ts-case fade-in">
+    <div class="ts-header">
+      <div class="ts-num" style="background:#f5f0ff;color:#6c2bd9;">02</div>
+      <div class="ts-title">SyncVar 타이밍 불일치</div>
+      <span class="ts-badge" style="color:#6c2bd9;border-color:#d8b4fe;background:#f5f0ff;">💬 AI 채팅 + 언리얼 경험</span>
+    </div>
+    <div class="ts-diagram"><svg viewBox="0 0 700 355" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- 문제 -->
+        <text x="20" y="22" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#dc2626" letter-spacing="2">PROBLEM · 스폰 직후 SyncVar 미보장</text>
+
+        <rect x="20" y="38" width="660" height="110" rx="6" fill="#fef2f2" stroke="#fecaca"/>
+
+        <rect x="40" y="55" width="270" height="78" rx="4" fill="white" stroke="#e5e7eb"/>
+        <text x="175" y="74" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#555" text-anchor="middle">서버</text>
+        <text x="175" y="92" font-family="Consolas, monospace" font-size="9" fill="#1a1a1a" text-anchor="middle">NetworkServer.Spawn(player)</text>
+        <text x="175" y="108" font-family="Consolas, monospace" font-size="9" fill="#dc2626" text-anchor="middle">syncNickname = "Player1"</text>
+        <text x="175" y="124" font-family="Malgun Gothic" font-size="8.5" fill="#888" text-anchor="middle">② 값 세팅 — 아직 클라에 미전파</text>
+
+        <text x="350" y="100" font-family="Malgun Gothic" font-size="24" fill="#dc2626" text-anchor="middle">→</text>
+
+        <rect x="390" y="55" width="270" height="78" rx="4" fill="white" stroke="#fecaca" stroke-width="1.5"/>
+        <text x="525" y="74" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#dc2626" text-anchor="middle">클라이언트 (OnStartClient)</text>
+        <text x="525" y="92" font-family="Consolas, monospace" font-size="9" fill="#1a1a1a" text-anchor="middle">nameText.text = syncNickname</text>
+        <text x="525" y="108" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#dc2626" text-anchor="middle">→ 빈 문자열 "" 표시</text>
+        <text x="525" y="124" font-family="Malgun Gothic" font-size="8.5" fill="#888" text-anchor="middle">네트워크 전파가 아직 안 옴</text>
+
+        <!-- 해결 — 언리얼 비교 -->
+        <text x="20" y="180" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#7c3aed" letter-spacing="2">SOLUTION · hook — 같은 원리, 다른 문법</text>
+
+        <rect x="20" y="198" width="660" height="130" rx="6" fill="#f5f3ff" stroke="#c4b5fd"/>
+
+        <!-- 언리얼 -->
+        <rect x="40" y="215" width="285" height="98" rx="4" fill="white" stroke="#d1d5db"/>
+        <text x="55" y="233" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#888">Unreal Engine · OnRep_</text>
+        <text x="55" y="252" font-family="Consolas, monospace" font-size="8.5" fill="#555">UPROPERTY(ReplicatedUsing=OnRep_Name)</text>
+        <text x="55" y="267" font-family="Consolas, monospace" font-size="8.5" fill="#1a1a1a">FString PlayerName;</text>
+        <text x="55" y="282" font-family="Consolas, monospace" font-size="8.5" fill="#1a1a1a">void OnRep_Name() {</text>
+        <text x="55" y="297" font-family="Consolas, monospace" font-size="8.5" fill="#7c3aed">    UpdateUI();  // 반영 시점에 호출</text>
+        <text x="55" y="308" font-family="Consolas, monospace" font-size="8.5" fill="#1a1a1a">}</text>
+
+        <!-- 같은 원리 -->
+        <text x="350" y="257" font-family="Malgun Gothic" font-size="11" font-weight="700" fill="#7c3aed" text-anchor="middle">=</text>
+        <text x="350" y="272" font-family="Malgun Gothic" font-size="9" fill="#888" text-anchor="middle">같은 원리</text>
+        <text x="350" y="287" font-family="Malgun Gothic" font-size="9" fill="#888" text-anchor="middle">다른 문법</text>
+
+        <!-- Mirror -->
+        <rect x="375" y="215" width="285" height="98" rx="4" fill="white" stroke="#d1d5db"/>
+        <text x="390" y="233" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#7c3aed">Mirror · hook</text>
+        <text x="390" y="252" font-family="Consolas, monospace" font-size="8.5" fill="#555">[SyncVar(hook = nameof(OnNameChanged))]</text>
+        <text x="390" y="267" font-family="Consolas, monospace" font-size="8.5" fill="#1a1a1a">string syncNickname;</text>
+        <text x="390" y="282" font-family="Consolas, monospace" font-size="8.5" fill="#1a1a1a">void OnNameChanged(string _, string v) {</text>
+        <text x="390" y="297" font-family="Consolas, monospace" font-size="8.5" fill="#7c3aed">    UpdateUI(v);  // 반영 시점에 호출</text>
+        <text x="390" y="308" font-family="Consolas, monospace" font-size="8.5" fill="#1a1a1a">}</text>
+      </svg></div>
+    <div class="ts-body">
+      <div class="ts-col"><div class="ts-col-label" style="color:#6c2bd9;">증상</div><div class="ts-col-text">스폰 직후 닉네임·팀 색상이 빈값. 로그로 <code>syncNickname</code>이 빈 문자열임을 확인</div></div>
+      <div class="ts-col"><div class="ts-col-label" style="color:#6c2bd9;">원인 & 해결</div><div class="ts-col-text">언리얼 <code>OnRep_</code> 경험으로 Mirror hook의 필요성을 바로 파악. 값이 클라에 실제 반영되는 순간을 hook으로 잡음</div></div>
+      <div class="ts-col"><div class="ts-col-label" style="color:#6c2bd9;">결과</div><div class="ts-col-text">스폰 타이밍 문제 완전 해결. 두 엔진의 동기화 콜백이 같은 원리임을 확인</div></div>
+    </div>
+  </div>
+
+  <div class="ts-case fade-in">
+    <div class="ts-header">
+      <div class="ts-num" style="background:#ecfdf5;color:#047857;">03</div>
+      <div class="ts-title">Authenticator 수신 불가</div>
+      <span class="ts-badge" style="color:#047857;border-color:#a7f3d0;background:#ecfdf5;">💬 AI 채팅</span>
+    </div>
+    <div class="ts-diagram"><svg viewBox="0 0 700 355" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr-r2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#dc2626"/>
+          </marker>
+          <marker id="arr-g3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#059669"/>
+          </marker>
+        </defs>
+
+        <!-- 문제 -->
+        <text x="20" y="22" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#dc2626" letter-spacing="2">PROBLEM · 순환 의존 구조</text>
+
+        <rect x="20" y="38" width="660" height="130" rx="6" fill="#fef2f2" stroke="#fecaca"/>
+
+        <rect x="50" y="60" width="160" height="52" rx="6" fill="white" stroke="#7c3aed" stroke-width="2"/>
+        <text x="130" y="82" font-family="Malgun Gothic" font-size="11" font-weight="700" fill="#5b21b6" text-anchor="middle">클라이언트</text>
+        <text x="130" y="98" font-family="Consolas, monospace" font-size="9" fill="#7c3aed" text-anchor="middle">AuthRequestMessage</text>
+
+        <line x1="210" y1="86" x2="290" y2="86" stroke="#dc2626" stroke-width="2" marker-end="url(#arr-r2)"/>
+        <text x="250" y="77" font-family="Malgun Gothic" font-size="9" fill="#dc2626" text-anchor="middle">전송</text>
+
+        <rect x="290" y="60" width="200" height="52" rx="6" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+        <text x="390" y="80" font-family="Malgun Gothic" font-size="11" font-weight="700" fill="#dc2626" text-anchor="middle">서버</text>
+        <text x="390" y="96" font-family="Malgun Gothic" font-size="9.5" fill="#dc2626" text-anchor="middle">인증 전 → 수신 거부</text>
+
+        <text x="520" y="90" font-family="Malgun Gothic" font-size="24" fill="#dc2626">✗</text>
+
+        <rect x="50" y="128" width="620" height="30" rx="4" fill="white" stroke="#fecaca"/>
+        <text x="360" y="147" font-family="Malgun Gothic" font-size="10" fill="#dc2626" text-anchor="middle">
+          인증 완료하려면 메시지 필요  ↔  메시지 받으려면 인증 완료 필요
+        </text>
+
+        <!-- 해결 -->
+        <text x="20" y="205" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#059669" letter-spacing="2">SOLUTION · requireAuthentication = false 옵션 추가</text>
+
+        <rect x="20" y="222" width="660" height="105" rx="6" fill="#ecfdf5" stroke="#a7f3d0"/>
+
+        <!-- Before -->
+        <rect x="40" y="240" width="270" height="72" rx="4" fill="white" stroke="#fecaca"/>
+        <text x="175" y="260" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#dc2626" text-anchor="middle">Before</text>
+        <text x="175" y="278" font-family="Consolas, monospace" font-size="8.5" fill="#555" text-anchor="middle">NetworkServer.RegisterHandler</text>
+        <text x="175" y="293" font-family="Consolas, monospace" font-size="8.5" fill="#dc2626" text-anchor="middle">&lt;AuthRequestMessage&gt;(OnAuth)</text>
+        <text x="175" y="307" font-family="Malgun Gothic" font-size="8.5" fill="#888" text-anchor="middle">인증 전 수신 차단</text>
+
+        <text x="355" y="283" font-family="Malgun Gothic" font-size="20" font-weight="800" fill="#059669" text-anchor="middle">→</text>
+
+        <!-- After -->
+        <rect x="390" y="240" width="270" height="72" rx="4" fill="white" stroke="#a7f3d0"/>
+        <text x="525" y="260" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#059669" text-anchor="middle">After</text>
+        <text x="525" y="278" font-family="Consolas, monospace" font-size="8.5" fill="#555" text-anchor="middle">NetworkServer.RegisterHandler</text>
+        <text x="525" y="293" font-family="Consolas, monospace" font-size="8.5" fill="#059669" text-anchor="middle">&lt;AuthRequestMessage&gt;(OnAuth, false)</text>
+        <text x="525" y="307" font-family="Malgun Gothic" font-size="8.5" fill="#047857" text-anchor="middle">인증 전에도 수신 가능</text>
+      </svg></div>
+    <div class="ts-body">
+      <div class="ts-col"><div class="ts-col-label" style="color:#047857;">증상</div><div class="ts-col-text">클라이언트가 인증 메시지를 전송해도 서버 <code>OnAuthRequestMessage</code>가 호출되지 않음</div></div>
+      <div class="ts-col"><div class="ts-col-label" style="color:#047857;">원인 & 해결</div><div class="ts-col-text">인증 완료 전엔 메시지 수신 자체가 차단되는 순환 구조. <code>requireAuthentication = false</code> 옵션 하나로 해결</div></div>
+      <div class="ts-col"><div class="ts-col-label" style="color:#047857;">결과</div><div class="ts-col-text">인증 전 단계에서도 메시지 수신 가능. 이후 인증 흐름 정상 동작</div></div>
+    </div>
+  </div>
+
+  <div class="ts-case fade-in">
+    <div class="ts-header">
+      <div class="ts-num" style="background:#eff6ff;color:#1d4ed8;">04</div>
+      <div class="ts-title">로딩바 80% 멈춤</div>
+      <span class="ts-badge" style="color:#1d4ed8;border-color:#bfdbfe;background:#eff6ff;">💬 AI 채팅</span>
+    </div>
+    <div class="ts-diagram"><svg viewBox="0 0 700 355" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr-b2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/>
+          </marker>
+          <marker id="arr-r3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#dc2626"/>
+          </marker>
+          <marker id="arr-g4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#059669"/>
+          </marker>
+        </defs>
+
+        <!-- Before -->
+        <text x="20" y="22" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#dc2626" letter-spacing="2">BEFORE · 문제 구조</text>
+
+        <g transform="translate(20, 38)">
+          <rect width="140" height="50" rx="5" fill="white" stroke="#2563eb" stroke-width="1.5"/>
+          <text x="70" y="22" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#2563eb" text-anchor="middle">LoadingScene 진입</text>
+          <text x="70" y="38" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">로딩바 시작 0%</text>
+
+          <line x1="140" y1="25" x2="160" y2="25" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arr-b2)"/>
+
+          <rect x="160" y="0" width="140" height="50" rx="5" fill="white" stroke="#2563eb" stroke-width="1.5"/>
+          <text x="230" y="22" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#2563eb" text-anchor="middle">StartClient()</text>
+          <text x="230" y="38" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">로딩바 80%</text>
+
+          <!-- Mirror 자동 전환 -->
+          <line x1="230" y1="50" x2="230" y2="75" stroke="#dc2626" stroke-width="2" stroke-dasharray="4,2" marker-end="url(#arr-r3)"/>
+          <text x="250" y="68" font-family="Malgun Gothic" font-size="9" fill="#dc2626">Mirror 강제 전환!</text>
+          <text x="250" y="82" font-family="Malgun Gothic" font-size="8.5" fill="#888">서버:Battle ≠ 클라:Loading</text>
+
+          <rect x="160" y="85" width="140" height="50" rx="5" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+          <text x="230" y="107" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#dc2626" text-anchor="middle">BattleScene 강제전환</text>
+          <text x="230" y="124" font-family="Malgun Gothic" font-size="9" fill="#dc2626" text-anchor="middle">로딩바 80%에서 끊김</text>
+        </g>
+
+        <!-- After -->
+        <text x="400" y="22" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#059669" letter-spacing="2">AFTER · 씬 먼저, 연결 나중</text>
+
+        <g transform="translate(400, 38)">
+          <rect width="135" height="50" rx="5" fill="white" stroke="#059669" stroke-width="1.5"/>
+          <text x="67.5" y="22" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#059669" text-anchor="middle">BattleScene 로드</text>
+          <text x="67.5" y="38" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">LoadSceneAsync()</text>
+
+          <line x1="135" y1="25" x2="155" y2="25" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-g4)"/>
+
+          <rect x="155" y="0" width="135" height="50" rx="5" fill="white" stroke="#059669" stroke-width="1.5"/>
+          <text x="222.5" y="22" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#059669" text-anchor="middle">로딩바 100%</text>
+          <text x="222.5" y="38" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">씬 로드 완료 대기</text>
+
+          <line x1="222.5" y1="50" x2="222.5" y2="72" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-g4)"/>
+
+          <rect x="155" y="80" width="135" height="50" rx="5" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+          <text x="222.5" y="102" font-family="Malgun Gothic" font-size="10" font-weight="700" fill="#047857" text-anchor="middle">StartClient()</text>
+          <text x="222.5" y="118" font-family="Malgun Gothic" font-size="9" fill="#555" text-anchor="middle">씬 일치 → 전환 없음</text>
+        </g>
+
+        <!-- Mirror 원리 설명 박스 -->
+        <rect x="20" y="230" width="660" height="100" rx="6" fill="#eff6ff" stroke="#bfdbfe"/>
+        <text x="40" y="252" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#2563eb" letter-spacing="2">MIRROR 씬 동기화 원리</text>
+        <text x="40" y="272" font-family="Malgun Gothic" font-size="10" fill="#1a1a1a">
+          Mirror는 <tspan font-weight="700">StartClient() 시점</tspan>에 서버 씬과 클라이언트 씬을 비교합니다.
+        </text>
+        <text x="40" y="291" font-family="Malgun Gothic" font-size="10" fill="#555">
+          서버 씬 ≠ 클라이언트 씬  →  onlineScene 설정 기반으로 클라이언트를 서버 씬으로 <tspan font-weight="700">강제 전환</tspan>
+        </text>
+        <text x="40" y="310" font-family="Malgun Gothic" font-size="10" fill="#555">
+          서버 씬 = 클라이언트 씬  →  추가 전환 없음. 연결만 수행
+        </text>
+        <text x="40" y="323" font-family="Malgun Gothic" font-size="10" fill="#2563eb">
+          <tspan font-weight="700">핵심:</tspan>  "씬 먼저 로드 → StartClient()" 순서로 Mirror 자동 전환을 우회
+        </text>
+      </svg></div>
+    <div class="ts-body">
+      <div class="ts-col"><div class="ts-col-label" style="color:#1d4ed8;">증상</div><div class="ts-col-text">로딩바 80%에서 갑자기 배틀씬 전환. 로그로 <code>onlineScene</code>에 의한 강제 전환 확인</div></div>
+      <div class="ts-col"><div class="ts-col-label" style="color:#1d4ed8;">원인 & 해결</div><div class="ts-col-text">Mirror가 서버·클라 씬 불일치 시 자동 강제 전환한다는 원리 파악. 씬 먼저 로드 → <code>StartClient()</code> 순서로 변경</div></div>
+      <div class="ts-col"><div class="ts-col-label" style="color:#1d4ed8;">결과</div><div class="ts-col-text">로딩바 100% 완료 후 씬 전환. 씬 전환과 서버 연결 타이밍을 완전히 제어</div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- 16. 기술 하이라이트 -->
+<section class="section" id="highlights">
+<div class="inner">
+  <div class="section-label">16 · HIGHLIGHTS</div>
+  <h2 class="section-title">기술 하이라이트</h2>
+  <div class="lead-box">
+    단순 기능 구현이 아닌, <strong>설계 결정이 담긴 7가지 핵심 포인트</strong>.<br>
+    각 항목은 "왜 그렇게 만들었는가"에 대한 답을 가집니다.
+  </div>
+  <div class="diagram-wrap fade-in"><svg viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg">
+        <g transform="translate(15, 15)">
+          <rect width="220" height="80" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+          <rect x="0" y="0" width="6" height="80" fill="#059669"/>
+          <circle cx="35" cy="40" r="18" fill="white" stroke="#059669" stroke-width="2"/>
+          <path d="M 35 28 L 23 33 L 23 44 Q 23 53 35 58 Q 47 53 47 44 L 47 33 Z" fill="#059669"/>
+          <text x="65" y="22" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#059669">01</text>
+          <text x="65" y="40" font-family="Malgun Gothic" font-size="11.5" font-weight="800" fill="#047857">서버 권위 구조</text>
+          <text x="65" y="56" font-family="Malgun Gothic" font-size="8.5" fill="#555">스탯 · 쿨다운 서버 이중</text>
+          <text x="65" y="68" font-family="Malgun Gothic" font-size="8.5" fill="#555">검증 → 클라 조작 차단</text>
+        </g>
+
+        <g transform="translate(245, 15)">
+          <rect width="220" height="80" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+          <rect x="0" y="0" width="6" height="80" fill="#2563eb"/>
+          <circle cx="35" cy="40" r="18" fill="white" stroke="#2563eb" stroke-width="2"/>
+          <rect x="26" y="32" width="6" height="6" fill="#2563eb"/>
+          <rect x="38" y="32" width="6" height="6" fill="#2563eb"/>
+          <rect x="26" y="44" width="6" height="6" fill="#2563eb"/>
+          <rect x="38" y="44" width="6" height="6" fill="#2563eb"/>
+          <text x="65" y="22" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#2563eb">02</text>
+          <text x="65" y="40" font-family="Malgun Gothic" font-size="11.5" font-weight="800" fill="#1e40af">로비/배틀 서버 분리</text>
+          <text x="65" y="56" font-family="Malgun Gothic" font-size="8.5" fill="#555">독립 프로세스 + 포트 풀</text>
+          <text x="65" y="68" font-family="Malgun Gothic" font-size="8.5" fill="#555">다중 매치 동시 진행</text>
+        </g>
+
+        <g transform="translate(475, 15)">
+          <rect width="220" height="80" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+          <rect x="0" y="0" width="6" height="80" fill="#7c3aed"/>
+          <circle cx="35" cy="40" r="18" fill="white" stroke="#7c3aed" stroke-width="2"/>
+          <text x="35" y="46" font-family="Consolas, monospace" font-size="11" font-weight="800" fill="#7c3aed" text-anchor="middle">{}</text>
+          <text x="65" y="22" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#7c3aed">03</text>
+          <text x="65" y="40" font-family="Malgun Gothic" font-size="11.5" font-weight="800" fill="#5b21b6">입력 인터페이스 추상화</text>
+          <text x="65" y="56" font-family="Malgun Gothic" font-size="8.5" fill="#555">IPlayerInputProvider로</text>
+          <text x="65" y="68" font-family="Malgun Gothic" font-size="8.5" fill="#555">PC/모바일 코드 통합</text>
+        </g>
+
+        <g transform="translate(15, 110)">
+          <rect width="220" height="80" rx="6" fill="#fed7aa" stroke="#ea580c" stroke-width="1.5"/>
+          <rect x="0" y="0" width="6" height="80" fill="#ea580c"/>
+          <circle cx="35" cy="40" r="18" fill="white" stroke="#ea580c" stroke-width="2"/>
+          <path d="M 38 28 L 28 42 L 35 42 L 32 52 L 42 38 L 35 38 Z" fill="#ea580c"/>
+          <text x="65" y="22" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#ea580c">04</text>
+          <text x="65" y="40" font-family="Malgun Gothic" font-size="11.5" font-weight="800" fill="#c2410c">입력 버퍼 시스템</text>
+          <text x="65" y="56" font-family="Malgun Gothic" font-size="8.5" fill="#555">쿨다운 직전 입력 0.15초</text>
+          <text x="65" y="68" font-family="Malgun Gothic" font-size="8.5" fill="#555">보존 → 반응성 향상</text>
+        </g>
+
+        <g transform="translate(245, 110)">
+          <rect width="220" height="80" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+          <rect x="0" y="0" width="6" height="80" fill="#2563eb"/>
+          <circle cx="35" cy="40" r="18" fill="white" stroke="#2563eb" stroke-width="2"/>
+          <polygon points="35,30 27,38 35,42 27,46 35,50 43,46 35,42 43,38" fill="#2563eb"/>
+          <text x="65" y="22" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#2563eb">05</text>
+          <text x="65" y="40" font-family="Malgun Gothic" font-size="11.5" font-weight="800" fill="#1e40af">SO 데이터 분리</text>
+          <text x="65" y="56" font-family="Malgun Gothic" font-size="8.5" fill="#555">로비용/전투용 이원화</text>
+          <text x="65" y="68" font-family="Malgun Gothic" font-size="8.5" fill="#555">컴파일 없이 밸런싱</text>
+        </g>
+
+        <g transform="translate(475, 110)">
+          <rect width="220" height="80" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+          <rect x="0" y="0" width="6" height="80" fill="#059669"/>
+          <circle cx="35" cy="40" r="18" fill="white" stroke="#059669" stroke-width="2"/>
+          <path d="M 26 40 L 32 46 L 44 32" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round"/>
+          <text x="65" y="22" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#059669">06</text>
+          <text x="65" y="40" font-family="Malgun Gothic" font-size="11.5" font-weight="800" fill="#047857">HP 비율 판정</text>
+          <text x="65" y="56" font-family="Malgun Gothic" font-size="8.5" fill="#555">단순 생존자 수 대신</text>
+          <text x="65" y="68" font-family="Malgun Gothic" font-size="8.5" fill="#555">팀 HP 합산 → 공정 판정</text>
+        </g>
+
+        <g transform="translate(245, 205)">
+          <rect width="220" height="80" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+          <rect x="0" y="0" width="6" height="80" fill="#7c3aed"/>
+          <circle cx="35" cy="40" r="18" fill="white" stroke="#7c3aed" stroke-width="2"/>
+          <circle cx="35" cy="40" r="6" fill="#7c3aed"/>
+          <circle cx="28" cy="35" r="4" fill="#7c3aed"/>
+          <circle cx="42" cy="38" r="4" fill="#7c3aed"/>
+          <circle cx="32" cy="44" r="4" fill="#7c3aed"/>
+          <text x="65" y="22" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#7c3aed">07</text>
+          <text x="65" y="40" font-family="Malgun Gothic" font-size="11.5" font-weight="800" fill="#5b21b6">절차적 맵 + 덤불 은신</text>
+          <text x="65" y="56" font-family="Malgun Gothic" font-size="8.5" fill="#555">맵 생성기 + BushZone</text>
+          <text x="65" y="68" font-family="Malgun Gothic" font-size="8.5" fill="#555">전략적 공간 연출</text>
+        </g>
+
+        <rect x="15" y="305" width="680" height="50" rx="6" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+        <text x="35" y="328" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#7c3aed" letter-spacing="2">CORE PRINCIPLE</text>
+        <text x="35" y="346" font-family="Malgun Gothic" font-size="11" fill="#5b21b6">
+          <tspan font-weight="700">"왜"가 명확한 설계.</tspan> 각 결정은 구체적인 문제를 해결하기 위해 선택했으며, 모두 면접에서 설명할 수 있습니다.
+        </text>
+      </svg></div>
+</div>
+</section>
+
+<!-- 17. 프로젝트 구조 -->
+<section class="section" id="structure">
+<div class="inner">
+  <div class="section-label">17 · CODEBASE</div>
+  <h2 class="section-title">프로젝트 구조</h2>
+  <div class="lead-box">
+    폴더는 <strong>기능 단위</strong>로 분리. 각 폴더가 명확한 책임을 가지며, 네이밍 규칙으로 역할을 즉시 식별할 수 있습니다.
+  </div>
+  <div class="diagram-wrap fade-in"><svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg">
+        <g transform="translate(20, 20)">
+          <rect width="320" height="340" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+          <text x="20" y="28" font-family="Consolas, monospace" font-size="9" font-weight="700" fill="#94a3b8" letter-spacing="2">FOLDER STRUCTURE</text>
+
+          <text x="20" y="55" font-family="Consolas, monospace" font-size="11" fill="#f1f5f9"><tspan font-weight="700">Assets/_dev/Script/</tspan></text>
+          <text x="30" y="78" font-family="Consolas, monospace" font-size="10" fill="#fb923c">├── Battle/</text>
+          <text x="180" y="78" font-family="Consolas, monospace" font-size="8.5" fill="#64748b"># 전투 · 맵 · Bush</text>
+          <text x="30" y="98" font-family="Consolas, monospace" font-size="10" fill="#fb923c">├── Combat/</text>
+          <text x="180" y="98" font-family="Consolas, monospace" font-size="8.5" fill="#64748b"># 무기 · 발사체</text>
+          <text x="30" y="118" font-family="Consolas, monospace" font-size="10" fill="#34d399">├── Data/</text>
+          <text x="180" y="118" font-family="Consolas, monospace" font-size="8.5" fill="#64748b"># ScriptableObject</text>
+          <text x="30" y="138" font-family="Consolas, monospace" font-size="10" fill="#a78bfa">├── Gacha/</text>
+          <text x="180" y="138" font-family="Consolas, monospace" font-size="8.5" fill="#64748b"># 가챠 시스템</text>
+          <text x="30" y="158" font-family="Consolas, monospace" font-size="10" fill="#a78bfa">├── Inventory/</text>
+          <text x="180" y="158" font-family="Consolas, monospace" font-size="8.5" fill="#64748b"># 인벤토리 · 강화</text>
+          <text x="30" y="178" font-family="Consolas, monospace" font-size="10" fill="#60a5fa">├── Lobby/</text>
+          <text x="180" y="178" font-family="Consolas, monospace" font-size="8.5" fill="#64748b"># 로비 컨트롤러</text>
+          <text x="30" y="198" font-family="Consolas, monospace" font-size="10" fill="#60a5fa">├── Login/</text>
+          <text x="180" y="198" font-family="Consolas, monospace" font-size="8.5" fill="#64748b"># 로그인</text>
+          <text x="30" y="218" font-family="Consolas, monospace" font-size="10" fill="#a78bfa">├── Player/</text>
+          <text x="180" y="218" font-family="Consolas, monospace" font-size="8.5" fill="#64748b"># Controller · Stats</text>
+          <text x="30" y="238" font-family="Consolas, monospace" font-size="10" fill="#34d399">├── Server/</text>
+          <text x="180" y="238" font-family="Consolas, monospace" font-size="8.5" fill="#64748b"># NetworkManager</text>
+          <text x="30" y="258" font-family="Consolas, monospace" font-size="10" fill="#60a5fa">├── Shop/</text>
+          <text x="180" y="258" font-family="Consolas, monospace" font-size="8.5" fill="#64748b"># 상점</text>
+          <text x="30" y="278" font-family="Consolas, monospace" font-size="10" fill="#60a5fa">└── UI/</text>
+          <text x="180" y="278" font-family="Consolas, monospace" font-size="8.5" fill="#64748b"># 공통 UI</text>
+
+          <text x="20" y="310" font-family="Consolas, monospace" font-size="8" fill="#475569">// 11개 기능 폴더 · 단일 책임 원칙</text>
+        </g>
+
+        <g transform="translate(360, 20)">
+          <text x="0" y="20" font-family="Consolas, monospace" font-size="10" font-weight="700" fill="#888" letter-spacing="2">NAMING CONVENTIONS</text>
+          <text x="0" y="38" font-family="Malgun Gothic" font-size="11" font-weight="700" fill="#1a1a1a">파일명만 봐도 역할 파악 가능</text>
+
+          <g transform="translate(0, 55)">
+            <rect width="320" height="60" rx="4" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+            <text x="15" y="22" font-family="Consolas, monospace" font-size="13" font-weight="800" fill="#5b21b6">~Manager</text>
+            <text x="15" y="40" font-family="Malgun Gothic" font-size="9.5" fill="#555">씬 또는 시스템 단위 매니저</text>
+            <text x="15" y="53" font-family="Consolas, monospace" font-size="9" fill="#888">BattleManager · SpawnManager</text>
+          </g>
+
+          <g transform="translate(0, 125)">
+            <rect width="320" height="60" rx="4" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+            <text x="15" y="22" font-family="Consolas, monospace" font-size="13" font-weight="800" fill="#1e40af">~Controller</text>
+            <text x="15" y="40" font-family="Malgun Gothic" font-size="9.5" fill="#555">UI 또는 입력 컨트롤러</text>
+            <text x="15" y="53" font-family="Consolas, monospace" font-size="9" fill="#888">LobbyController · PlayerController</text>
+          </g>
+
+          <g transform="translate(0, 195)">
+            <rect width="320" height="60" rx="4" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+            <text x="15" y="22" font-family="Consolas, monospace" font-size="13" font-weight="800" fill="#047857">~Data / ~SO</text>
+            <text x="15" y="40" font-family="Malgun Gothic" font-size="9.5" fill="#555">ScriptableObject 데이터</text>
+            <text x="15" y="53" font-family="Consolas, monospace" font-size="9" fill="#888">CharacterDataSO · AttackDataSO</text>
+          </g>
+
+          <g transform="translate(0, 265)">
+            <rect width="320" height="60" rx="4" fill="#fed7aa" stroke="#ea580c" stroke-width="1.5"/>
+            <text x="15" y="22" font-family="Consolas, monospace" font-size="13" font-weight="800" fill="#c2410c">Cmd~ / Rpc~</text>
+            <text x="15" y="40" font-family="Malgun Gothic" font-size="9.5" fill="#555">Mirror Command / RPC 메서드</text>
+            <text x="15" y="53" font-family="Consolas, monospace" font-size="9" fill="#888">CmdUseAttack · RpcShowDamage</text>
+          </g>
+        </g>
+      </svg></div>
+</div>
+</section>
+
+<!-- 마무리 -->
+<div class="ending">
+  <div class="hero-badge" style="margin-bottom:20px;">TECHNICAL DOCUMENT · END</div>
+  <h2>끝까지 봐주셔서 감사합니다</h2>
+  <p class="ending-sub">프로젝트의 코드와 개발 과정이 궁금하시다면 아래 링크를 참고해주세요</p>
+  <div class="link-cards">
+    <a class="link-card" href="https://github.com/ooweaJ/Unity_Dedicate" target="_blank" rel="noopener">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="#e2e8f0"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      <div class="link-card-label">GITHUB</div>
+      <div class="link-card-name">프로젝트 저장소</div>
+      <div class="link-card-desc">코드 · 커밋 히스토리</div>
+      <div class="link-card-url">github.com/ooweaJ/Unity_Dedicate</div>
+    </a>
+    <a class="link-card" href="https://www.notion.so/Unity-Dedicated-Server-C-Mirror-2c4dc21508298045b0c0fcc4b95c99aa" target="_blank" rel="noopener">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="#e2e8f0"><path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.887l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.139c-.093-.514.28-.887.747-.933z"/></svg>
+      <div class="link-card-label">NOTION</div>
+      <div class="link-card-name">개발일지</div>
+      <div class="link-card-desc">트러블슈팅 · 의사결정</div>
+      <div class="link-card-url">notion.so/Unity-Dedicated-Server</div>
+    </a>
+  </div>
+</div>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.06 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+const navItems = document.querySelectorAll('.nav-item');
+const sections = document.querySelectorAll('section[id]');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navItems.forEach(n => n.classList.remove('active'));
+      const active = document.querySelector(`.nav-item[href="#${e.target.id}"]`);
+      if (active) {
+        active.classList.add('active');
+        active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+sections.forEach(s => io.observe(s));
+</script>
+</body>
+</html>

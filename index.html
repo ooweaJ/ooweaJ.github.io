@@ -735,9 +735,13 @@ function escapeHtml(s) {
 }
 function isSafeUrl(u) {
   if (!u) return false;
+  const value = String(u).trim();
+  if (!value || /[\u0000-\u001F\u007F]/.test(value)) return false;
+  if (/^(javascript|data|vbscript):/i.test(value)) return false;
+  const isRelativeAsset = /^(?:\.\/)?assets\//i.test(value);
   try {
-    const parsed = new URL(u, location.href);
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:' || parsed.protocol === 'mailto:';
+    const parsed = new URL(value, location.href);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:' || parsed.protocol === 'mailto:' || (parsed.protocol === 'file:' && isRelativeAsset);
   } catch { return false; }
 }
 
