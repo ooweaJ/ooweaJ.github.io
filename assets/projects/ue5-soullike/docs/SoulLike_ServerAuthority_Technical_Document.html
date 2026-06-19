@@ -1,0 +1,599 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SoulLike Server-Authoritative Action · Technical Document</title><style>
+:root{
+  --ink:#16222e; --muted:#566a7d; --blue:#1478c9; --blue2:#2c8ad6;
+  --paper:#f3f6fa; --card:#ffffff; --line:#d8e2ec; --navy:#0b243c;
+  --steel:#33506b; --purple:#7158b3; --teal:#2d8992; --green:#4f9d63;
+  --red:#b65151; --gold:#9a7a22; --ember:#c4682f; --ember2:#e08a4a;
+  --shadow:0 6px 16px rgba(18,40,62,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#dfe5eb;color:var(--ink);
+  font-family:"Noto Sans CJK KR","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",Arial,sans-serif;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+.mono{font-family:"Noto Sans Mono CJK KR","D2Coding",Consolas,monospace}
+
+/* ---------- page shell ---------- */
+.page-wrap{width:1536px;height:864px;margin:20px auto;position:relative}
+.page{position:absolute;left:0;top:0;width:1536px;height:864px;background:var(--paper);overflow:hidden}
+.page::before{content:"";position:absolute;left:40px;top:22px;width:104px;height:6px;background:var(--blue);border-radius:99px}
+.doc-head{position:absolute;left:40px;right:40px;top:40px;min-height:80px;border-radius:20px;background:#e9f1f8;
+  display:flex;align-items:center;padding:14px 28px;gap:26px}
+.doc-head .num{font-size:38px;line-height:1;color:var(--blue);font-weight:400;width:74px;flex:none}
+.doc-head .eyebrow{font-size:11px;letter-spacing:.05em;color:#4d8cc0;font-weight:800;margin-bottom:3px}
+.doc-head h1{margin:0;font-size:26px;line-height:1.12;font-weight:700;letter-spacing:-.02em}
+.doc-head p{margin:4px 0 0;color:#647889;font-size:12px;line-height:1.3}
+.content{position:absolute;left:58px;right:58px;top:148px;bottom:46px;
+  display:flex;flex-direction:column;justify-content:center}
+.content > *{width:100%}
+.footer{position:absolute;left:58px;right:58px;bottom:16px;height:18px;display:flex;
+  justify-content:space-between;align-items:center;color:#9aa8b6;font-size:9px}
+
+/* ---------- cards / text ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
+  padding:22px 24px;min-width:0;overflow:hidden}
+.card.tight{padding:17px 19px}
+.kicker{font-size:15px;font-weight:800;color:var(--blue);margin:0 0 13px;letter-spacing:-.01em}
+.kicker.purple{color:var(--purple)}.kicker.green{color:var(--green)}.kicker.red{color:var(--red)}
+.kicker.gold{color:#9a7a22}.kicker.teal{color:var(--teal)}.kicker.ember{color:var(--ember)}.kicker.steel{color:var(--steel)}
+.kicker .n{display:inline-block;min-width:34px;color:#9fb1c0;font-weight:800;margin-right:2px}
+.lead{font-size:14px;line-height:1.78;color:#2b4054;margin:0}
+.small{font-size:12px;line-height:1.68;color:#374d61;margin:0}
+.tiny{font-size:10.5px;line-height:1.6;color:#62748a;margin:0}
+b,strong{font-weight:700;color:#1d3144}
+.hl{color:var(--ember);font-weight:700}
+
+ul.clean{list-style:none;margin:10px 0 0;padding:0}
+ul.clean li{position:relative;margin:8px 0;padding-left:17px;font-size:12px;line-height:1.55;color:#374d61}
+ul.clean li::before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:2px;background:var(--blue)}
+ul.clean.ember li::before{background:var(--ember)}
+ul.clean.green li::before{background:var(--green)}
+ul.clean.steel li::before{background:var(--steel)}
+ol.steps{list-style:none;margin:10px 0 0;padding:0;counter-reset:s}
+ol.steps li{position:relative;margin:9px 0;padding-left:30px;font-size:12px;line-height:1.55;color:#374d61}
+ol.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:20px;height:20px;
+  border-radius:7px;background:#e7f0f8;color:var(--blue);font-size:10px;font-weight:800;
+  display:flex;align-items:center;justify-content:center}
+
+/* ---------- grids / layout helpers ---------- */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.col{display:flex;flex-direction:column;gap:18px;min-height:0}
+.row{display:flex;gap:18px}
+
+/* ---------- chips / tags ---------- */
+.chips{display:flex;gap:9px;flex-wrap:wrap}
+.chip{padding:7px 13px;border-radius:999px;font-size:10px;font-weight:700;background:#e4f0fa;color:#2476b6}
+.chip.purple{background:#efeafa;color:#6e54ad}.chip.teal{background:#e2f2f3;color:#2a7d86}
+.chip.green{background:#e7f4ea;color:#3d8b52}.chip.gold{background:#fbf2d9;color:#8c6f1f}
+.chip.ember{background:#fbe9dd;color:#b3592a}.chip.steel{background:#e8edf2;color:#3f5a73}
+
+/* ---------- info table ---------- */
+.info{width:100%;border-collapse:collapse;font-size:12px}
+.info th,.info td{padding:8.5px 4px;border-bottom:1px solid #edf1f5;text-align:left;vertical-align:top}
+.info th{color:#7790a4;width:33%;font-weight:600;white-space:nowrap}
+.info td{font-weight:600;color:#243a4f}
+.info tr:last-child th,.info tr:last-child td{border-bottom:0}
+
+/* ---------- data table ---------- */
+.dt{width:100%;border-collapse:collapse;font-size:10.5px}
+.dt th{background:#eef4f9;color:#56708a;font-weight:700;text-align:left}
+.dt th,.dt td{border:1px solid #dde6ed;padding:8px 10px;vertical-align:top;line-height:1.45}
+.dt td:first-child{font-weight:700;color:#243a4f;white-space:nowrap}
+.dt td .mono,.dt td code{font-size:9.5px;color:#34506b}
+
+/* ---------- flow nodes ---------- */
+.flow{display:flex;align-items:stretch;gap:8px;min-width:0}
+.node{flex:1;min-width:0;border-radius:12px;color:#fff;padding:13px 10px;text-align:center;
+  font-weight:700;font-size:12.5px;line-height:1.2;display:flex;flex-direction:column;justify-content:center}
+.node small{display:block;margin-top:6px;font-size:8px;font-weight:500;color:rgba(255,255,255,.68);letter-spacing:.02em}
+.node.navy{background:var(--navy)}.node.steel{background:var(--steel)}.node.blue{background:var(--blue)}
+.node.purple{background:var(--purple)}.node.teal{background:var(--teal)}.node.green{background:var(--green)}
+.node.red{background:var(--red)}.node.gold{background:var(--gold)}.node.ember{background:var(--ember)}
+.arrow{flex:0 0 auto;align-self:center;color:#7ba6c8;font-size:18px;font-weight:800}
+
+/* vertical step chain */
+.vflow{display:flex;flex-direction:column;gap:0}
+.vstep{display:flex;align-items:center;gap:13px;padding:1px 0}
+.vstep .dot{flex:none;width:13px;display:flex;flex-direction:column;align-items:center;align-self:stretch}
+.vstep .dot i{width:11px;height:11px;border-radius:50%;background:var(--blue);margin-top:13px;flex:none}
+.vstep .dot .line{width:2px;flex:1;background:#cfdce8;margin:3px 0 -1px}
+.vstep:last-child .dot .line{display:none}
+.vstep .body{flex:1;padding:8px 0}
+.vstep .t{font-size:12.5px;font-weight:700;color:#22384c}
+.vstep .t .mono{font-size:11px;color:#2f4d6a;font-weight:700}
+.vstep .d{font-size:10px;color:#69798a;margin-top:2px}
+.vstep.s i{background:var(--steel)} .vstep.b i{background:var(--blue)}
+.vstep.p i{background:var(--purple)} .vstep.t2 i{background:var(--teal)}
+.vstep.g i{background:var(--green)} .vstep.e i{background:var(--ember)} .vstep.r i{background:var(--red)}
+
+/* ---------- code block ---------- */
+.code{background:#0c2538;color:#dcebfb;border-radius:13px;padding:15px 18px;
+  font-family:"Noto Sans Mono CJK KR","D2Coding",Consolas,monospace;font-size:10.5px;line-height:1.62;
+  white-space:pre-wrap;overflow:hidden}
+.code .label{color:#64b6e8;font-size:9px;font-weight:700;letter-spacing:.06em;display:block;margin-bottom:8px;text-transform:uppercase}
+.code .c{color:#7fd0a8}      /* accent / keyword green */
+.code .e{color:var(--ember2)} /* ember emphasis */
+.code .m{color:#7d96ab}      /* muted */
+.code .a{color:#8fc6ee}      /* arrow / path blue */
+
+/* ---------- soft callouts ---------- */
+.soft{background:#eef5fb;border-radius:12px;padding:13px 15px}
+.soft.purple{background:#f1ecfa}.soft.teal{background:#e6f2f3}.soft.green{background:#eaf5ed}
+.soft.gold{background:#fbf4df}.soft.ember{background:#fbeee4}.soft.steel{background:#eaeff4}.soft.red{background:#faecec}
+.soft .st{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin:0 0 6px;color:#5f7388}
+.soft.ember .st{color:var(--ember)}.soft.green .st{color:#3f8b54}.soft.purple .st{color:#6a52a6}
+.soft.teal .st{color:#2a7d86}.soft.red .st{color:#a94a4a}.soft.gold .st{color:#8a6c1c}.soft.steel .st{color:#42566b}
+.soft p{font-size:11px;line-height:1.56;color:#43586b;margin:0}
+
+/* problem→solution case */
+.case{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);
+  padding:17px 19px;display:flex;flex-direction:column;gap:0;overflow:hidden}
+.case h3{margin:0 0 12px;font-size:14px;color:#1d3144;display:flex;align-items:center;gap:9px}
+.case h3 .badge{flex:none;width:26px;height:26px;border-radius:8px;background:var(--ember);color:#fff;
+  font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.pscale{display:grid;grid-template-columns:50px 1fr;gap:7px 12px;align-items:start}
+.pscale .lab{font-size:9.5px;font-weight:800;letter-spacing:.03em;padding-top:1px}
+.pscale .lab.p{color:var(--red)}.pscale .lab.c{color:#9a7a22}.pscale .lab.s{color:var(--blue)}.pscale .lab.r{color:var(--green)}
+.pscale .txt{font-size:10.5px;line-height:1.5;color:#41566a}
+.pscale .div{grid-column:1 / -1;height:1px;background:#eef2f6;margin:3px 0}
+
+/* metric / stat */
+.stat{border-radius:13px;padding:14px 12px;text-align:center;background:#eef6fb}
+.stat .v{font-size:23px;color:var(--blue);font-weight:800;line-height:1}
+.stat .l{font-size:9px;color:#6d8091;margin-top:6px;line-height:1.3}
+.stat.ember{background:#fbeee4}.stat.ember .v{color:var(--ember)}
+.stat.green{background:#eaf5ed}.stat.green .v{color:var(--green)}
+.stat.steel{background:#eaeff4}.stat.steel .v{color:var(--steel)}
+
+.bartitle{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#6b7d8c;margin:0 0 9px}
+.rule{height:1px;background:#e6edf3;margin:13px 0}
+
+/* ---------- cover ---------- */
+.cover{background:#08182a;color:#fff}
+.cover::before{background:var(--ember)}
+.cover .glow{position:absolute;right:-160px;top:-150px;width:520px;height:520px;border-radius:50%;
+  background:radial-gradient(circle at 40% 40%,rgba(196,104,47,.42),rgba(196,104,47,0) 62%)}
+.cover .glow2{position:absolute;left:-120px;bottom:-180px;width:480px;height:480px;border-radius:50%;
+  background:radial-gradient(circle at 50% 50%,rgba(20,120,201,.30),rgba(20,120,201,0) 60%)}
+.cover .arc{position:absolute;right:200px;top:120px;width:560px;height:560px;border:1.5px solid rgba(224,138,74,.30);
+  border-radius:50%;border-left-color:transparent;border-bottom-color:transparent;transform:rotate(24deg)}
+.cover-content{position:absolute;left:64px;right:64px;top:60px;z-index:2}
+.cover .eyebrow{font-size:11px;letter-spacing:.14em;color:#e6a473;font-weight:800}
+.cover h1{font-size:62px;line-height:1;margin:74px 0 10px;letter-spacing:-.04em;font-weight:800}
+.cover h1 .sl{color:var(--ember2)}
+.cover h2{font-size:21px;font-weight:600;color:#bcd2e2;margin:0;letter-spacing:-.01em}
+.cover .desc{margin-top:18px;max-width:760px;color:#93aec1;font-size:13px;line-height:1.7}
+.cover .tags{display:flex;gap:9px;margin-top:26px;flex-wrap:wrap}
+.cover .tags span{font-size:9.5px;padding:8px 14px;border-radius:999px;background:#11304c;color:#bfe0f6;border:1px solid #20557c}
+.cover .tags span.e{background:#3a2014;color:#f0c19c;border-color:#7a4426}
+.cover-bottom{position:absolute;left:64px;right:64px;bottom:54px;display:grid;grid-template-columns:330px 1fr;gap:26px;z-index:2}
+.cover-box{background:#102e49;border:1px solid #1d4d73;border-radius:16px;padding:20px 22px}
+.cover-box.e{background:#241510;border-color:#5e3722}
+.cover-box h3{margin:0 0 11px;font-size:11px;letter-spacing:.08em;color:#8fcdf0}
+.cover-box.e h3{color:#e6a473}
+.cover-box p{font-size:10.5px;line-height:1.65;color:#cfe1ee;margin:0}
+.cover-box ul{margin:0;padding:0;list-style:none}
+.cover-box li{font-size:10.5px;line-height:1.5;color:#d3e3ef;margin:6px 0;padding-left:14px;position:relative}
+.cover-box li::before{content:"";position:absolute;left:0;top:7px;width:5px;height:5px;border-radius:50%;background:var(--ember2)}
+.cover-box .name{font-size:16px;color:#fff;font-weight:800}
+
+@media print{
+  @page{size:16in 9in;margin:0}
+  html,body{background:#fff}
+  .page-wrap{width:16in;height:9in;margin:0;break-after:page;page-break-after:always}
+  .page{position:relative;width:16in;height:9in}
+  .page-wrap:last-child{break-after:auto;page-break-after:auto}
+}
+
+</style></head><body><div class="page-wrap"><section class="page cover">
+<div class="glow"></div><div class="glow2"></div><div class="arc"></div>
+<div class="cover-content">
+  <div class="eyebrow">UNREAL ENGINE 5.7 · C++ · SERVER-AUTHORITATIVE NETWORKING</div>
+  <h1>Soul<span class="sl">Like</span></h1>
+  <h2>서버 권위 액션 구조 현대화 기술문서</h2>
+  <p class="desc">레거시 액션 RPG의 <b style="color:#e7c2a4">Server RPC → Reliable Multicast</b> 중심 전투 흐름을,
+  소유 클라이언트 예측 재생과 서버 확정 액션 상태 복제 구조로 단계적으로 현대화한 개인 프로젝트.
+  그래픽 완성도가 아니라 <b style="color:#e7c2a4">멀티플레이 전투 동기화 · 액션 상태 복제 · 검증 가능한 리팩터링</b>을 설명합니다.</p>
+  <div class="tags">
+    <span class="e">Server Authority</span><span>Action Replication</span><span>Client Prediction</span>
+    <span>GameplayTag · DataTable</span><span>Boss Skill Sync</span><span>Death / Respawn</span>
+  </div>
+</div>
+<div class="cover-bottom">
+  <div class="cover-box e"><h3>AUTHOR</h3>
+    <p><span class="name">유재우</span><br>Unreal Gameplay Programmer<br><br>SoulLike · 개인 프로젝트 (레거시 현대화)</p></div>
+  <div class="cover-box"><h3>CORE WORK</h3>
+    <ul>
+      <li>액션 실행 단일 진입점 <span class="mono">UActionComponent::TryAction</span> 설계</li>
+      <li>소유 클라이언트 예측 재생 + 서버 확정 액션 상태 복제</li>
+      <li>장착 아이템 · 현재 액션 태그(GameplayTag) 최소 복제</li>
+      <li>피격 리액션 · Grux 보스 메테오 서버 권위 처리</li>
+      <li>사망 / 부활 — 서버 상태 복구와 클라이언트 표현 복구 분리</li>
+    </ul></div>
+</div><footer class="footer"><span>SoulLike Server-Authoritative Action · Technical Document</span><span>01 / 15</span></footer></section></div><div class="page-wrap"><section class="page p01"><header class="doc-head"><div class="num">01</div><div><div class="eyebrow">SOULLIKE · 서버 권위 액션</div><h1>Project Overview</h1><p>프로젝트 한 줄 소개, 목표와 제약을 정리합니다.</p></div></header><main class="content">
+<div style="display:grid;grid-template-columns:1.12fr .88fr;gap:22px">
+  <section class="card" style="display:flex;flex-direction:column">
+    <div class="kicker">프로젝트 개요</div>
+    <p class="lead">Unreal Engine 5.7 기반 소울라이크 액션 RPG에서, 기존 전투 흐름을
+    <b>서버 권위 액션 상태 복제 구조</b>로 단계적으로 현대화했습니다. 평타 · 피격 · 장착 아이템 ·
+    보스 스킬 · 사망/부활처럼 결과가 중요한 흐름에서 <span class="hl">서버와 클라이언트 결과가 어긋나는 문제</span>를 줄이는 것이 목표입니다.</p>
+    <table class="info" style="margin-top:18px">
+      <tr><th>Project</th><td>SoulLike — 서버 권위 액션 구조 현대화</td></tr>
+      <tr><th>Genre</th><td>소울라이크 액션 RPG (멀티플레이)</td></tr>
+      <tr><th>Engine</th><td>Unreal Engine 5.7 · C++</td></tr>
+      <tr><th>Networking</th><td>Unreal Replication · RPC · NetMulticast</td></tr>
+      <tr><th>Gameplay</th><td>GameplayTag · DataTable · Anim Notify</td></tr>
+      <tr><th>Validation</th><td>UnrealBuildTool · 2인 PIE · 별도 프로세스 NULL</td></tr>
+      <tr><th>Type</th><td>레거시 프로젝트 현대화 · 1인 개발</td></tr>
+    </table>
+  </section>
+  <div class="col">
+    <section class="card tight">
+      <div class="kicker green">목표</div>
+      <ul class="clean green">
+        <li>플레이어와 AI 액션이 <b>서버 기준</b>으로 결정되고, 클라이언트에는 복제 상태/명시적 네트워크 이벤트로 표현되게 만든다.</li>
+        <li>전투 핵심 흐름에서 서버·클라이언트 결과가 어긋나는 문제를 줄인다.</li>
+        <li>한 번에 갈아엎지 않고, <b>빌드 가능한 작은 단위</b>로 수정하고 문서화한다.</li>
+      </ul>
+    </section>
+    <section class="card tight">
+      <div class="kicker ember">제약</div>
+      <ul class="clean ember">
+        <li>레거시 Unreal 프로젝트 현대화 — 대규모 재작성 대신 단계적 수정이 필요했다.</li>
+        <li><span class="mono">AItem</span> · Anim Notify · Character · Controller가 서로 직접 호출하는 구조가 남아 한 번에 교체하기 어려웠다.</li>
+        <li>게임플레이 복제 문제와 OSS 문제를 분리하기 위해 NULL/직접 접속 및 PIE 검증을 우선했다.</li>
+      </ul>
+    </section>
+  </div>
+</div></main><footer class="footer"><span>SoulLike Server-Authoritative Action · Technical Document</span><span>02 / 15</span></footer></section></div><div class="page-wrap"><section class="page p02"><header class="doc-head"><div class="num">02</div><div><div class="eyebrow">SOULLIKE · 서버 권위 액션</div><h1>Implementation Scope</h1><p>직접 구현한 범위, 외부 자산, AI 활용 경계를 구분합니다.</p></div></header><main class="content">
+<div style="display:grid;grid-template-columns:1.5fr 1fr;gap:20px">
+  <section class="card" style="display:flex;flex-direction:column">
+    <div class="kicker">직접 설계 및 구현</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 26px;margin-top:6px">
+      <ul class="clean" style="margin-top:4px">
+        <li>액션 실행 단일 진입점 <span class="mono">TryAction(FGameplayTag)</span> 추가</li>
+        <li>소유 클라이언트 예측 재생 + 서버 확정 액션 상태 복제 설계</li>
+        <li><span class="mono">FActiveAction{ActionTag, Sequence}</span> 기반 반복 복제 트리거</li>
+        <li><span class="mono">StateComponent::Type</span> 서버 권위 갱신 · <span class="mono">OnRep</span> 전환</li>
+        <li>장착 아이템 Actor · 선택 아이템 참조 복제 정리</li>
+        <li><span class="mono">AItem::CurrentActionTag</span> 복제로 동일 DataTable 액션 재구성</li>
+      </ul>
+      <ul class="clean" style="margin-top:4px">
+        <li>피격 리액션을 서버 판정 후 Multicast 이벤트로 전파</li>
+        <li>Grux 보스 메테오 / 공중 콤보 서버 권위 처리 · 널 가드 보강</li>
+        <li>사망/부활에서 서버 상태 복구와 클라이언트 표현 복구 분리</li>
+        <li>별도 프로세스 NULL 리슨서버/클라이언트 테스트 스크립트 작성</li>
+        <li>작업 로그 · 아키텍처 문서 · 검증 기록 작성</li>
+      </ul>
+    </div>
+  </section>
+  <div class="col">
+    <section class="card tight">
+      <div class="kicker steel">외부 리소스 · 기존 자산</div>
+      <p class="small">캐릭터, 애니메이션, Niagara 이펙트, 일부 맵/에셋은 기존 프로젝트 리소스와 외부 에셋을 사용했습니다.
+      <b>포트폴리오 평가 대상은 에셋 제작이 아니라 전투 액션 구조, 네트워크 동기화, 디버깅 및 리팩터링 과정</b>입니다.</p>
+    </section>
+    <section class="card tight">
+      <div class="kicker purple">AI 활용 범위</div>
+      <ul class="clean" style="margin-top:6px">
+        <li><b>Codex</b> — 코드 검색, 영향 범위 추적, 작업 로그 정리, 테스트 기준 문서화</li>
+        <li><b>UE-MCP</b> — 에디터 상태 확인, PIE 실행, 런타임 Pawn/Component 상태 확인 보조</li>
+      </ul>
+      <div class="soft purple" style="margin-top:12px"><p><b>직접 수행:</b> 최종 구조 선택, 코드 수정 방향, 빌드 실패 원인 판단, 검증 기준 결정.</p></div>
+    </section>
+  </div>
+</div></main><footer class="footer"><span>SoulLike Server-Authoritative Action · Technical Document</span><span>03 / 15</span></footer></section></div><div class="page-wrap"><section class="page p03"><header class="doc-head"><div class="num">03</div><div><div class="eyebrow">SOULLIKE · 서버 권위 액션</div><h1>Tech Stack</h1><p>전투 동기화와 리팩터링에 사용한 엔진·네트워크·툴링을 정리합니다.</p></div></header><main class="content">
+<div style="display:grid;grid-template-columns:1.75fr 1fr;gap:20px">
+  <section class="card" style="display:flex;flex-direction:column">
+    <div class="kicker">사용 기술</div>
+    <table class="dt" style="margin-top:6px">
+      <tr><th style="width:14%">구분</th><th style="width:30%">기술</th><th>사용 목적</th></tr>
+      <tr><td>Engine</td><td><b style="color:#23394e">Unreal Engine 5.7</b></td><td class="tiny" style="color:#52677b">C++ 기반 액션 RPG · PIE/별도 프로세스 검증</td></tr>
+      <tr><td>Language</td><td><b style="color:#23394e">C++</b></td><td class="tiny" style="color:#52677b">캐릭터 · 액션 · 아이템 · AI · 투사체 · 네트워크 로직 구현</td></tr>
+      <tr><td>Networking</td><td><b style="color:#23394e">Replication · RPC · NetMulticast</b></td><td class="tiny" style="color:#52677b">액션 상태 · 장착 아이템 · 피격/이펙트 이벤트 동기화</td></tr>
+      <tr><td>Gameplay</td><td><b style="color:#23394e">GameplayTag · DataTable · Anim Notify</b></td><td class="tiny" style="color:#52677b">액션 식별 · 데이터 조회 · 몽타주 타이밍 이벤트</td></tr>
+      <tr><td>AI</td><td><b style="color:#23394e">Behavior Tree · AIController · Blackboard</b></td><td class="tiny" style="color:#52677b">타겟 탐색 · 공격 의사결정 · 보스 스킬 실행</td></tr>
+      <tr><td>Online</td><td><b style="color:#23394e">OnlineSubsystem NULL / Steam 준비</b></td><td class="tiny" style="color:#52677b">로컬 직접 접속 테스트 · Steam 세션 전환 준비</td></tr>
+      <tr><td>Tooling</td><td><b style="color:#23394e">UnrealBuildTool · UE-MCP · Git</b></td><td class="tiny" style="color:#52677b">빌드 검증 · PIE 확인 · 변경 단위 기록</td></tr>
+    </table>
+  </section>
+  <div class="col">
+    <section class="card tight">
+      <div class="kicker ember">설계 키워드</div>
+      <div class="chips" style="margin-top:4px">
+        <span class="chip ember">Server Authority</span><span class="chip">Owner Prediction</span>
+        <span class="chip teal">OnRep</span><span class="chip purple">COND_SkipOwner</span>
+        <span class="chip">Minimal Replication</span><span class="chip steel">GameplayTag</span>
+        <span class="chip green">NetMulticast Event</span><span class="chip gold">Null Guard</span>
+      </div>
+    </section>
+    <section class="card tight" style="flex:1;display:flex;flex-direction:column;justify-content:center">
+      <div class="kicker steel">핵심 트레이드오프</div>
+      <p class="small"><span class="hl">전체 상태가 아니라 의미만 복제</span> — <span class="mono">FActionData</span> 전체 대신
+      액션의 의미를 나타내는 <span class="mono">GameplayTag</span>만 복제하고, 클라이언트가 동일 DataTable에서
+      액션 데이터를 재구성합니다. 네트워크 상태를 작게 유지하면서 서버·클라이언트가 같은 액션을 가리키도록 보장합니다.</p>
+    </section>
+  </div>
+</div></main><footer class="footer"><span>SoulLike Server-Authoritative Action · Technical Document</span><span>04 / 15</span></footer></section></div><div class="page-wrap"><section class="page p04"><header class="doc-head"><div class="num">04</div><div><div class="eyebrow">SOULLIKE · 서버 권위 액션</div><h1>Legacy Structure — Core Problem</h1><p>액션마다 네트워크 패턴이 달랐던 기존 전투 흐름의 한계입니다.</p></div></header><main class="content">
+<div style="display:grid;grid-template-columns:.92fr 1.08fr;gap:20px">
+  <section class="card" style="display:flex;flex-direction:column">
+    <div class="kicker red">기존 전투 흐름</div>
+    <p class="tiny" style="margin-bottom:6px">액션마다 네트워크 패턴이 달랐던 초기 구조</p>
+    <div class="vflow" style="margin-top:6px">
+<div class="vstep s"><div class="dot"><i></i><div class="line"></div></div><div class="body"><div class="t">Input <span class="mono">OnMouseL / OnMouseR / OnQ / OnEvade</span></div><div class="d">ABasePlayer 입력 진입</div></div></div><div class="vstep b"><div class="dot"><i></i><div class="line"></div></div><div class="body"><div class="t"><span class="mono">Server RPC</span></div><div class="d">서버 요청</div></div></div><div class="vstep b"><div class="dot"><i></i><div class="line"></div></div><div class="body"><div class="t"><span class="mono">Reliable NetMulticast</span></div><div class="d">전체 표현 전파</div></div></div><div class="vstep t2"><div class="dot"><i></i><div class="line"></div></div><div class="body"><div class="t"><span class="mono">EquipComponent::GetCurrentItem()</span></div><div class="d">현재 아이템 조회</div></div></div><div class="vstep p"><div class="dot"><i></i><div class="line"></div></div><div class="body"><div class="t"><span class="mono">AItem::OnDefaultAction / OnSkillAction</span></div><div class="d">아이템 액션 실행</div></div></div><div class="vstep g"><div class="dot"><i></i><div class="line"></div></div><div class="body"><div class="t"><span class="mono">AnimMontage</span> 재생</div><div class="d">몽타주 표현</div></div></div><div class="vstep r"><div class="dot"><i></i><div class="line"></div></div><div class="body"><div class="t"><span class="mono">Anim Notify</span> — 콤보·충돌·이동·종료</div><div class="d">Notify가 게임플레이 직접 호출</div></div></div>
+    </div>
+  </section>
+  <section class="card" style="display:flex;flex-direction:column">
+    <div class="kicker">이 구조에서 발생할 수 있던 문제</div>
+    <ul class="clean ember" style="margin-top:6px">
+      <li><b>입력감 저하</b> — 소유 클라이언트도 서버 왕복 후에야 평타 몽타주를 보게 되어 지연 환경에서 반응이 늦다.</li>
+      <li><b>상태 충돌</b> — 클라이언트가 <span class="mono">StateComponent::Type</span> 같은 복제 변수를 로컬에서 직접 변경할 수 있어 서버 상태와 충돌한다.</li>
+      <li><b>데이터 불일치</b> — <span class="mono">SelectItem</span> · <span class="mono">CurrentData</span>가 서버/클라이언트에서 같은 액션을 가리킨다는 보장이 부족하다.</li>
+      <li><b>AI 재현 불가</b> — AIController는 서버에만 존재하므로 결정한 애니메이션 속도·공격 타이밍을 클라이언트가 그대로 재현하기 어렵다.</li>
+      <li><b>책임 경계 모호</b> — Anim Notify가 판정·이동·콤보·종료까지 직접 호출해 책임 경계가 흐렸다.</li>
+    </ul>
+  </section>
+</div></main><footer class="footer"><span>SoulLike Server-Authoritative Action · Technical Document</span><span>05 / 15</span></footer></section></div><div class="page-wrap"><section class="page p05"><header class="doc-head"><div class="num">05</div><div><div class="eyebrow">SOULLIKE · 서버 권위 액션</div><h1>Target Architecture</h1><p>입력은 클라이언트에서, 액션 상태 확정은 서버에서. 목표 흐름과 4원칙입니다.</p></div></header><main class="content">
+<div style="display:grid;grid-template-rows:auto auto;gap:20px">
+  <section class="card">
+    <div class="kicker green">목표 전투 액션 흐름</div>
+<div class="flow"><div class="node steel">Client Input<small>입력 시작</small></div><div class="arrow">›</div><div class="node blue">TryAction(ActionTag)<small>단일 진입점</small></div><div class="arrow">›</div><div class="node teal">Owner Prediction<small>즉시 예측 재생</small></div><div class="arrow">›</div><div class="node blue">Server_TryAction<small>서버 요청</small></div><div class="arrow">›</div><div class="node purple">Server Validation<small>서버 검증</small></div><div class="arrow">›</div><div class="node ember">FActiveAction 갱신<small>ActionTag·Sequence</small></div><div class="arrow">›</div><div class="node green">OnRep → 동일 몽타주<small>각 클라이언트 재생</small></div></div>
+  </section>
+  <section class="card">
+    <div class="kicker">핵심 원칙 4가지</div>
+    <div class="grid2" style="margin-top:6px">
+      <div class="soft steel"><p class="st">01 · 서버가 확정</p><p>입력은 클라이언트에서 시작할 수 있지만, <b>최종 액션 상태는 서버가 확정</b>한다.</p></div>
+      <div class="soft teal"><p class="st">02 · 태그 기준 재구성</p><p>클라이언트는 서버가 복제한 <b>액션 태그를 기준</b>으로 같은 DataTable 액션 데이터를 재구성한다.</p></div>
+      <div class="soft purple"><p class="st">03 · 예측 + Skip Owner</p><p>소유 클라이언트는 즉시 예측 재생하되, 서버 확정 상태와 충돌하지 않도록 <b>owner 복제는 건너뛴다</b>.</p></div>
+      <div class="soft ember"><p class="st">04 · 결과는 서버 권위</p><p>데미지 · 사망 · 부활 · 보스 스킬 판정처럼 <b>결과가 중요한 처리는 서버 권위</b>로 제한한다.</p></div>
+    </div>
+  </section>
+</div></main><footer class="footer"><span>SoulLike Server-Authoritative Action · Technical Document</span><span>06 / 15</span></footer></section></div><div class="page-wrap"><section class="page p06"><header class="doc-head"><div class="num">06</div><div><div class="eyebrow">SOULLIKE · 서버 권위 액션</div><h1>Core · Unified Action Component</h1><p>액션 요청을 하나의 진입점으로 모으고, 예측 재생과 서버 확정을 분리합니다.</p></div></header><main class="content">
+<div style="display:grid;grid-template-columns:1.06fr .94fr;gap:20px">
+  <div class="col">
+    <section class="card">
+      <div class="kicker"><span class="n">7-1</span>통일 액션 컴포넌트</div>
+      <p class="small"><span class="mono">UActionComponent</span>는 평타 경로를 먼저 이전하기 위한 <b>최소 액션 레이어</b>입니다.
+      액션 요청을 하나의 진입점으로 모으고, 소유 클라이언트 예측과 서버 확정을 분리합니다.</p>
+      <ul class="clean" style="margin-top:10px">
+        <li><span class="mono">TryAction(FGameplayTag)</span> — 액션 요청 단일 진입점</li>
+        <li>서버는 <span class="mono">CommitAction()</span>으로 검증과 실행을 처리</li>
+        <li>소유 클라이언트는 <span class="mono">CanStartAction()</span> 통과 시 즉시 <span class="mono">PlayActionLocal()</span> 실행 → 입력 지연 감소</li>
+        <li>서버 확정 액션은 <span class="mono">ActiveAction</span>으로 복제</li>
+        <li><span class="hl">COND_SkipOwner</span> 복제로 예측 재생한 소유 클라이언트의 중복 재생 회피</li>
+        <li><span class="mono">Sequence</span> 증가 → 같은 ActionTag 반복에도 <span class="mono">OnRep</span> 재실행 보장</li>
+      </ul>
+    </section>
+    <section class="card tight">
+      <div class="bartitle">CODE PATH</div>
+      <p class="tiny mono" style="color:#3a536c;line-height:1.85">Source/SoulLike/Component/ActionComponent.{h,cpp}<br>
+      Source/SoulLike/Actor/Character/Player/BasePlayer.cpp<br>
+      Source/SoulLike/Actor/Character/BaseCharacter.cpp</p>
+    </section>
+  </div>
+  <div class="col">
+    <section class="card">
+      <div class="kicker teal">예측 · 확정 분기</div>
+<div class="flow"><div class="node steel">TryAction<small>요청</small></div><div class="arrow">›</div><div class="node teal">Owner Local<small>예측 재생</small></div><div class="arrow">›</div><div class="node blue">Server_TryAction<small>서버</small></div><div class="arrow">›</div><div class="node green">ActiveAction<small>SkipOwner 복제</small></div></div>
+      <p class="tiny" style="margin-top:12px;color:#5d7186">소유 클라이언트는 예측 경로로 즉시 반응하고, 그 외 클라이언트는 복제된 <span class="mono">ActiveAction</span>으로 동일 몽타주를 재생합니다.</p>
+    </section>
+    <div class="code"><span class="label">ActionComponent · 의사 코드</span><span class="m">// 단일 진입점</span>
+void TryAction(FGameplayTag Tag){
+  <span class="m">// 소유 클라이언트: 즉시 예측 재생</span>
+  if (IsOwnerLocal() && CanStartAction(Tag))
+    PlayActionLocal(Tag);
+  Server_TryAction(Tag);          <span class="m">// 서버에 요청</span>
+}
+<span class="m">// 서버 권위 확정</span>
+void Server_TryAction_Impl(FGameplayTag Tag){
+  if (!CommitAction(Tag)) return; <span class="m">// 검증 실패 → 무시</span>
+  ActiveAction.ActionTag = Tag;
+  ActiveAction.Sequence<span class="e">++</span>;        <span class="m">// 반복 트리거</span>
+}                                 <span class="c">// COND_SkipOwner</span>
+void OnRep_ActiveAction(){ PlayActionLocal(ActiveAction.ActionTag); }</div>
+  </div>
+</div></main><footer class="footer"><span>SoulLike Server-Authoritative Action · Technical Document</span><span>07 / 15</span></footer></section></div><div class="page-wrap"><section class="page p07"><header class="doc-head"><div class="num">07</div><div><div class="eyebrow">SOULLIKE · 서버 권위 액션</div><h1>Core · State & Item Replication</h1><p>상태 변경 권한을 서버로 모으고, 액션의 의미만 태그로 복제합니다.</p></div></header><main class="content">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+  <section class="card" style="display:flex;flex-direction:column">
+    <div class="kicker purple"><span class="n">7-2</span>상태 복제 기준 정리</div>
+    <p class="small"><span class="mono">UStateComponent::Type</span>은 복제 변수였지만 클라이언트 로컬에서 직접 변경될 여지가 있었습니다.
+    <b>상태 변경 권한을 서버로 모으는 것</b>이 목적입니다.</p>
+    <ul class="clean" style="margin-top:8px">
+      <li><span class="mono">Type</span>을 <span class="mono">ReplicatedUsing=OnRep_Type</span> 기준으로 정리</li>
+      <li><span class="mono">ChangeType()</span>은 <b>서버 권위에서만</b> 상태 변경</li>
+      <li>액션 종료 시 서버는 <span class="mono">Idle</span> 복귀, 클라이언트 예측 잠금은 <b>몽타주 종료 기준</b>으로 해제하도록 분리</li>
+    </ul>
+    <div class="soft purple" style="margin-top:auto"><p>클라이언트가 임의로 액션 상태를 앞서 변경해 <b>다음 서버 복제와 충돌</b>하는 상황을 줄입니다.</p></div>
+  </section>
+  <section class="card" style="display:flex;flex-direction:column">
+    <div class="kicker teal"><span class="n">7-3</span>장착 아이템 · 현재 액션 태그 복제</div>
+    <p class="small">기존 Notify/콤보 구조는 <span class="mono">GetCurrentItem()</span>·<span class="mono">CurrentData</span>에 크게 의존 —
+    서버/클라이언트가 다른 데이터를 보면 같은 몽타주라도 판정·콤보가 어긋났습니다.</p>
+    <ul class="clean" style="margin-top:8px">
+      <li>기본 아이템은 <b>서버에서만 스폰</b></li>
+      <li><span class="mono">SelectItem</span> → <span class="mono">ReplicatedUsing=OnRep_SelectItem</span> 전환</li>
+      <li><span class="mono">AItem</span>을 복제 Actor로 전환 · <span class="mono">bAlwaysRelevant</span>·NetUpdateFrequency 조정</li>
+      <li><span class="mono">CurrentActionTag</span> 복제 → <span class="mono">OnRep</span>에서 로컬 DataTable 재조회로 <span class="mono">CurrentData</span> 재구성</li>
+    </ul>
+    <div class="soft teal" style="margin-top:auto"><p><b>최소 복제 선택:</b> <span class="mono">FActionData</span> 전체가 아니라 의미를 나타내는 <b>GameplayTag만 복제</b>해 네트워크 상태를 작게 유지합니다.</p></div>
+  </section>
+</div></main><footer class="footer"><span>SoulLike Server-Authoritative Action · Technical Document</span><span>08 / 15</span></footer></section></div><div class="page-wrap"><section class="page p08"><header class="doc-head"><div class="num">08</div><div><div class="eyebrow">SOULLIKE · 서버 권위 액션</div><h1>Core · Hit Reaction & Boss Sync</h1><p>서버 판정 후 Multicast 이벤트로 표현을 전파하고, 보스 스킬을 서버 권위로 제한합니다.</p></div></header><main class="content">
+<div style="display:grid;grid-template-columns:.86fr 1.14fr;gap:20px">
+  <section class="card" style="display:flex;flex-direction:column">
+    <div class="kicker"><span class="n">7-4</span>피격 리액션 전파</div>
+    <p class="small">서버에서 데미지를 처리해도 클라이언트에 피격 몽타주 재생 호출이 전달되지 않을 수 있었습니다.</p>
+    <div style="margin:14px 0"><div class="flow"><div class="node blue">TakeDamage<small>서버 판정</small></div><div class="arrow">›</div><div class="node purple">MontageComponent<small>피격 키 선택</small></div><div class="arrow">›</div><div class="node green">Multicast<small>리액션 전파</small></div></div></div>
+    <ul class="clean" style="margin-top:2px">
+      <li><span class="mono">TakeDamage()</span> — 서버에서 데미지/사망 판단</li>
+      <li>피격 몽타주 키 선택을 <span class="mono">UMontageComponent</span>로 이동</li>
+      <li><span class="mono">MulticastPlayHitReaction()</span>으로 각 클라이언트에 동일 리액션 전파</li>
+    </ul>
+    <div class="soft green" style="margin-top:auto"><p><b>데미지 판정은 서버, 리액션 재생은 모든 클라이언트</b>가 동일하게 수행하는 구조.</p></div>
+  </section>
+  <section class="card" style="display:flex;flex-direction:column">
+    <div class="kicker red"><span class="n">7-5</span>Grux 메테오 · 보스 스킬 동기화</div>
+    <p class="small">보스 Grux의 메테오와 공중 콤보는 서버/클라이언트가 서로 다른 상태를 만들기 쉬운 흐름이었습니다.</p>
+    <div class="grid2" style="margin-top:10px">
+      <ul class="clean" style="margin-top:0">
+        <li><span class="mono">AGruxMeteor</span>를 복제 Actor로 전환 · 이동 복제 ON</li>
+        <li>Target · Damage 등 메테오 상태를 복제 속성으로 추가</li>
+        <li>타이머 시작 · 투사체 활성화 · 충돌 · 데미지 · 파괴는 <b>서버 권위에서만</b> 실행</li>
+      </ul>
+      <ul class="clean" style="margin-top:0">
+        <li>바닥 폭발과 캐릭터 직접 피격을 분리</li>
+        <li>폭발 이펙트는 서버 Multicast 전파, <b>Actor 삭제는 짧게 지연</b>해 이펙트 RPC 유실 방지</li>
+        <li>Grux 공중 콤보 함수에 서버 권위 가드 · 널 가드 추가</li>
+      </ul>
+    </div>
+    <div class="bartitle" style="margin-top:14px">CODE PATH</div>
+    <p class="tiny mono" style="color:#3a536c;line-height:1.8">Actor/ProJectile/GruxMeteor.{h,cpp} · Actor/Character/AI/Grux.cpp · Actor/Item/GruxItem.cpp</p>
+  </section>
+</div></main><footer class="footer"><span>SoulLike Server-Authoritative Action · Technical Document</span><span>09 / 15</span></footer></section></div><div class="page-wrap"><section class="page p09"><header class="doc-head"><div class="num">09</div><div><div class="eyebrow">SOULLIKE · 서버 권위 액션</div><h1>Core · Death / Respawn & Responsibility Split</h1><p>서버 상태 복구와 클라이언트 표현 복구를 분리한, 프로젝트 전반의 단일 패턴입니다.</p></div></header><main class="content">
+<div style="display:grid;grid-template-columns:1.02fr .98fr;gap:20px">
+  <section class="card" style="display:flex;flex-direction:column">
+    <div class="kicker"><span class="n">7-6</span>사망 / 부활 흐름 보정</div>
+    <p class="small">사망 완료가 Anim Notify에만 의존하면 Notify 누락 시 부활 타이머가 시작되지 않을 수 있었고,
+    <b>서버 권위 상태 복구와 클라이언트 표현 복구가 한 함수에 섞여</b> 있었습니다.</p>
+    <ul class="clean" style="margin-top:8px">
+      <li>사망 완료 처리는 <b>서버에서 한 번만 예약</b></li>
+      <li>사망 Multicast는 visibility · 사망 이펙트 같은 <b>표현만</b> 처리</li>
+      <li>3초 후 서버 타이머가 <b>부활 Multicast</b> 호출</li>
+      <li>HP 회복 · <span class="mono">State->SetIdleMode()</span>는 <b>authority 인스턴스에서만</b></li>
+      <li>입력 · visibility · 몽타주 정리 · 이동 복구는 각 클라이언트 표현에 맞게</li>
+      <li>GameMode 리스폰 타이머는 <b>함수 로컬 핸들</b>로 사용해 다중 플레이어 타이머 덮어쓰기 방지</li>
+    </ul>
+  </section>
+  <section class="card" style="display:flex;flex-direction:column">
+    <div class="kicker steel">책임 분리 — 서버 권위 vs 클라이언트 표현</div>
+    <p class="tiny" style="margin-bottom:10px">이 프로젝트가 반복적으로 적용한 단일 패턴</p>
+    <div class="grid2" style="margin-top:2px">
+      <div class="soft ember" style="height:100%">
+        <p class="st">SERVER · 권위 (Authority)</p>
+        <ul class="clean ember" style="margin-top:4px">
+          <li>액션 검증 · 확정</li><li>데미지 · 사망 판정</li>
+          <li>HP / State 복구</li><li>보스 스킬 타이머·충돌·파괴</li><li>부활 예약</li>
+        </ul>
+      </div>
+      <div class="soft teal" style="height:100%">
+        <p class="st">CLIENT · 표현 (Presentation)</p>
+        <ul class="clean" style="margin-top:4px">
+          <li>예측 재생 (소유 클라이언트)</li><li>복제 태그 → 몽타주 재생</li>
+          <li>피격 / 폭발 이펙트</li><li>visibility · 입력 복구</li><li>몽타주 정리</li>
+        </ul>
+      </div>
+    </div>
+    <div class="rule"></div>
+    <p class="tiny" style="color:#5d7186"><span class="hl">연결고리는 복제와 Multicast</span> — 서버가 상태를 확정하고, 각 클라이언트는 복제된 상태/이벤트로 같은 결과를 표현합니다.</p>
+  </section>
+</div></main><footer class="footer"><span>SoulLike Server-Authoritative Action · Technical Document</span><span>10 / 15</span></footer></section></div><div class="page-wrap"><section class="page p10"><header class="doc-head"><div class="num">10</div><div><div class="eyebrow">SOULLIKE · 서버 권위 액션</div><h1>Troubleshooting · 1–2</h1><p>입력 지연과 장착/액션 데이터 불일치 — 문제 → 원인 → 해결 → 결과.</p></div></header><main class="content"><div class="grid2" style="align-items:stretch"><div class="case"><h3><span class="badge">1</span>소유 클라이언트 평타 입력 지연</h3>
+      <div class="pscale">
+        <div class="lab p">문제</div><div class="txt">기존 평타는 <span class='mono'>Server RPC → Reliable Multicast</span> 이후에 몽타주가 재생되어, 지연 환경에서 소유 클라이언트 입력 반응이 늦어질 수 있었다.</div><div class="div"></div>
+        <div class="lab c">원인</div><div class="txt">소유 클라이언트도 서버 응답을 기다린 뒤 같은 Multicast 경로로 표현을 받는 구조였다.</div><div class="div"></div>
+        <div class="lab s">해결</div><div class="txt"><span class='mono'>TryAction()</span>에서 소유 클라이언트가 조건을 통과하면 즉시 로컬 예측 재생, 서버에는 <span class='mono'>Server_TryAction()</span>. 서버 확정 액션은 <span class='mono'>ActiveAction</span>으로 복제하되 owner엔 <span class='hl'>COND_SkipOwner</span> 적용.</div><div class="div"></div>
+        <div class="lab r">결과</div><div class="txt">평타 경로에서 입력 즉시 반응과 서버 권위 액션 확정을 동시에 두는 기준선이 생겼다.</div>
+      </div></div><div class="case"><h3><span class="badge">2</span>장착 아이템 / 현재 액션 데이터 불일치</h3>
+      <div class="pscale">
+        <div class="lab p">문제</div><div class="txt">Anim Notify·콤보 로직이 현재 아이템·액션 데이터에 의존하지만, 서버와 클라이언트가 같은 데이터를 본다는 보장이 부족했다.</div><div class="div"></div>
+        <div class="lab c">원인</div><div class="txt">장착 아이템 참조와 <span class='mono'>CurrentData</span> 전체가 네트워크 기준으로 안정화되어 있지 않았다.</div><div class="div"></div>
+        <div class="lab s">해결</div><div class="txt">선택 아이템 Actor를 서버 스폰/복제 구조로 정리하고, 현재 액션은 <span class='mono'>FActionData</span> 전체 대신 <span class='mono'>CurrentActionTag</span>를 복제해 클라이언트가 DataTable에서 같은 데이터를 재구성하게 했다.</div><div class="div"></div>
+        <div class="lab r">결과</div><div class="txt">액션 의미를 태그로 맞추는 최소 복제 구조가 생겼고, 이후 콤보 인덱스·섹션·시작 시간 확장 기반이 마련됐다.</div>
+      </div></div></div></main><footer class="footer"><span>SoulLike Server-Authoritative Action · Technical Document</span><span>11 / 15</span></footer></section></div><div class="page-wrap"><section class="page p11"><header class="doc-head"><div class="num">11</div><div><div class="eyebrow">SOULLIKE · 서버 권위 액션</div><h1>Troubleshooting · 3–4</h1><p>보스 메테오 동기화와 사망/부활 복구 — 문제 → 원인 → 해결 → 결과.</p></div></header><main class="content"><div class="grid2" style="align-items:stretch"><div class="case"><h3><span class="badge">3</span>보스 메테오 이펙트와 판정 불일치</h3>
+      <div class="pscale">
+        <div class="lab p">문제</div><div class="txt">Grux 메테오가 클라이언트에서 안정적으로 보이지 않거나, 충돌 직후 Actor가 삭제되어 폭발 이펙트 Multicast를 놓칠 수 있었다.</div><div class="div"></div>
+        <div class="lab c">원인</div><div class="txt">메테오 Actor 복제와 서버 권위 충돌 처리가 부족했고, Multicast 직후 즉시 <span class='mono'>Destroy()</span>가 호출되는 구조였다.</div><div class="div"></div>
+        <div class="lab s">해결</div><div class="txt">메테오를 복제 Actor로 전환하고 서버에서만 충돌/데미지/파괴 처리. 이펙트 Multicast 후 충돌·이동을 끄고 <span class='mono'>SetLifeSpan(1.f)</span>로 지연 삭제.</div><div class="div"></div>
+        <div class="lab r">결과</div><div class="txt">보스 스킬의 실제 판정은 서버가 결정하고, 클라이언트는 복제 Actor와 Multicast 이펙트를 관찰하는 구조로 정리됐다.</div>
+      </div></div><div class="case"><h3><span class="badge">4</span>사망 후 부활 / 입력 복구 불안정</h3>
+      <div class="pscale">
+        <div class="lab p">문제</div><div class="txt">사망 Notify 누락·타이밍 어긋남 시 부활 타이머가 시작되지 않거나, 부활 후 입력·이동 가능 상태가 복구되지 않을 수 있었다.</div><div class="div"></div>
+        <div class="lab c">원인</div><div class="txt">사망 완료·부활 타이머·HP/State 복구·visibility/input 복구가 같은 흐름에 섞여 있었고 일부가 클라이언트에서도 직접 실행될 수 있었다.</div><div class="div"></div>
+        <div class="lab s">해결</div><div class="txt">서버가 사망 완료와 부활 타이머를 한 번만 관리하고, 클라이언트는 Multicast로 표현 상태를 복구하도록 분리. 부활 시 <span class='mono'>Status->SetMove()</span>로 이동 가능 상태 복원.</div><div class="div"></div>
+        <div class="lab r">결과</div><div class="txt">사망/부활의 서버 권위 상태와 클라이언트 표현 책임이 더 명확해졌다.</div>
+      </div></div></div></main><footer class="footer"><span>SoulLike Server-Authoritative Action · Technical Document</span><span>12 / 15</span></footer></section></div><div class="page-wrap"><section class="page p12"><header class="doc-head"><div class="num">12</div><div><div class="eyebrow">SOULLIKE · 서버 권위 액션</div><h1>Verification</h1><p>빌드, 2인 PIE 런타임 상태, 별도 프로세스 NULL 검증으로 결과를 증빙합니다.</p></div></header><main class="content">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+  <div class="col">
+    <section class="card tight">
+      <div class="kicker">빌드 검증 · UnrealBuildTool</div>
+      <div class="code" style="font-size:9.5px;margin-top:4px"><span class="label">Build.bat</span>Build.bat <span class="e">SoulLikeEditor Win64 Development</span>
+  -Project=...\SoulLike.uproject
+  -WaitMutex -FromMsBuild</div>
+      <ul class="clean green" style="margin-top:10px">
+        <li><span class="mono">SoulLikeEditor Win64 Development</span> 빌드 성공</li>
+        <li>여러 수정 단위에서 <span class="mono">Result: Succeeded</span> 확인</li>
+        <li>UHT 선언 오류 · 타입 불일치 · 접근 지정자 · deprecation 경고를 빌드 로그 기준으로 수정</li>
+      </ul>
+    </section>
+    <section class="card tight" style="flex:1">
+      <div class="kicker teal">별도 프로세스 검증 준비</div>
+      <div class="code" style="font-size:9.5px;margin-top:4px"><span class="label">LaunchNullListenTest.bat</span>Listen: /Game/_dev/Level/MainWorld<span class="e">?listen</span>
+Client: 127.0.0.1 <span class="m">직접 접속</span>
+Option: <span class="c">-nosteam</span></div>
+      <ul class="clean" style="margin-top:10px">
+        <li>Steam OSS 전환 전 <b>NULL/직접 접속</b> 기준으로 전투 동기화 문제 분리</li>
+        <li>PIE와 별도 프로세스의 Possess · BeginPlay · 복제 타이밍 차이 확인</li>
+      </ul>
+    </section>
+  </div>
+  <section class="card" style="display:flex;flex-direction:column">
+    <div class="kicker purple">2인 PIE 런타임 상태 확인</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px">
+      <div class="stat steel"><div class="v">2</div><div class="l">BP_Warrior0 · BP_Warrior1<br>스폰 확인</div></div>
+      <div class="stat"><div class="v">Idle</div><div class="l">두 Pawn 모두<br>StateComponent.Type</div></div>
+      <div class="stat green"><div class="v">600</div><div class="l">두 Pawn 모두<br>StatusComponent.SP.Current</div></div>
+      <div class="stat ember"><div class="v">0</div><div class="l">ActionComponent<br>ActiveAction.Sequence</div></div>
+    </div>
+    <ul class="clean" style="margin-top:14px">
+      <li><span class="mono">EquipComponent.SelectItem</span> 유효 상태 확인</li>
+      <li>PIE 로그 <span class="mono">Error</span> · <span class="mono">Warning</span> 필터 결과 <b>없음</b></li>
+    </ul>
+    <div class="soft green" style="margin-top:auto"><p><b>증빙 가능:</b> 빌드 로그 · 2인 PIE 런타임 상태 · NULL 테스트 스크립트 · 날짜별 작업 로그와 코드 경로.</p></div>
+  </section>
+</div></main><footer class="footer"><span>SoulLike Server-Authoritative Action · Technical Document</span><span>13 / 15</span></footer></section></div><div class="page-wrap"><section class="page p13"><header class="doc-head"><div class="num">13</div><div><div class="eyebrow">SOULLIKE · 서버 권위 액션</div><h1>Key Code Paths</h1><p>액션·아이템·피격·보스·사망 흐름별 핵심 코드 경로 맵입니다.</p></div></header><main class="content">
+<section class="card" style="display:flex;flex-direction:column">
+  <div class="kicker">핵심 코드 경로</div>
+  <p class="tiny" style="margin-bottom:8px">변경 단위가 어디에 있는지 — 포트폴리오에서 “무엇을 어디서 고쳤는지” 추적용</p>
+  <table class="dt" style="margin-top:2px">
+    <tr><th style="width:26%">목적</th><th>코드 경로</th></tr>
+<tr><td>통일 액션 진입점</td><td><span class="mono" style="font-size:9.5px;color:#34506b">Source/SoulLike/Component/ActionComponent.{h, cpp}</span></td></tr><tr><td>플레이어 평타 입력 연결</td><td><span class="mono" style="font-size:9.5px;color:#34506b">Source/SoulLike/Actor/Character/Player/BasePlayer.cpp</span></td></tr><tr><td>공통 캐릭터 컴포넌트 구성</td><td><span class="mono" style="font-size:9.5px;color:#34506b">Source/SoulLike/Actor/Character/BaseCharacter.cpp</span></td></tr><tr><td>장착 아이템 복제</td><td><span class="mono" style="font-size:9.5px;color:#34506b">Source/SoulLike/Component/EquipComponent.{h, cpp}</span></td></tr><tr><td>현재 액션 태그 복제</td><td><span class="mono" style="font-size:9.5px;color:#34506b">Source/SoulLike/Actor/Item/Item.{h, cpp}</span></td></tr><tr><td>피격 리액션 전파</td><td><span class="mono" style="font-size:9.5px;color:#34506b">Source/SoulLike/Actor/Character/BaseCharacter.cpp · Component/MontageComponent.cpp</span></td></tr><tr><td>보스 메테오 동기화</td><td><span class="mono" style="font-size:9.5px;color:#34506b">Source/SoulLike/Actor/ProJectile/GruxMeteor.{h, cpp}</span></td></tr><tr><td>사망 / 부활 처리</td><td><span class="mono" style="font-size:9.5px;color:#34506b">Source/SoulLike/Actor/Character/Player/BasePlayer.cpp · Actor/GameMode/MainWorldGameMode.cpp</span></td></tr><tr><td>별도 프로세스 테스트</td><td><span class="mono" style="font-size:9.5px;color:#34506b">Scripts/LaunchNullListenTest.bat · Scripts/LaunchSteamMenuTest.bat</span></td></tr>
+  </table>
+</section></main><footer class="footer"><span>SoulLike Server-Authoritative Action · Technical Document</span><span>14 / 15</span></footer></section></div><div class="page-wrap"><section class="page p14"><header class="doc-head"><div class="num">14</div><div><div class="eyebrow">SOULLIKE · 서버 권위 액션</div><h1>Retrospective & Summary</h1><p>잘한 점, 한계, 다음 개선과 포트폴리오 요약 문장입니다.</p></div></header><main class="content">
+<div style="display:grid;grid-template-rows:auto auto;gap:18px">
+  <div class="grid3">
+    <section class="card tight">
+      <div class="kicker green">잘한 점</div>
+      <ul class="clean green" style="margin-top:6px">
+        <li>한 번에 갈아엎지 않고 <b>평타부터</b> 서버 권위 액션 상태 복제 구조 적용</li>
+        <li>장착 아이템·액션 태그·피격·보스 메테오·사망/부활처럼 <b>실제 동기화 문제 지점</b>을 작게 나누어 수정</li>
+        <li>변경마다 작업 로그·검증 결과를 남겨 <b>“왜 그렇게 고쳤는지”</b>까지 설명 가능</li>
+      </ul>
+    </section>
+    <section class="card tight">
+      <div class="kicker ember">한계</div>
+      <ul class="clean ember" style="margin-top:6px">
+        <li><span class="mono">UActionComponent</span>는 평타 중심 1차 기준선 — 회피/스텝백/스킬/AI 전체가 완전 이전된 상태는 아님</li>
+        <li>콤보 인덱스·몽타주 시작 시간·섹션·재생 속도가 아직 별도 액션 상태로 정규화되지 않음</li>
+        <li>Steam OSS 런타임 세션 검증은 준비 단계 — 2 PC/2 계정 환경 검증 필요</li>
+        <li>Anim Notify가 여전히 일부 게임플레이 책임 보유 → 타이밍 이벤트 역할로 축소 필요</li>
+      </ul>
+    </section>
+    <section class="card tight">
+      <div class="kicker">다음 개선</div>
+      <ol class="steps" style="margin-top:6px">
+        <li>회피·스텝백·스킬을 <span class="mono">TryAction()</span> 패턴으로 이전</li>
+        <li>AI 평타/스킬도 서버 확정 액션 상태 복제로 통일</li>
+        <li><span class="mono">FActiveAction</span>에 콤보 인덱스·섹션·시작 시간 등 최소 필드 추가</li>
+        <li><span class="mono">Net PktLag</span> 환경에서 예측 재생·서버 보정 검증</li>
+        <li>NULL 직접 접속 통과 후 Steam OSS 세션 검증으로 진행</li>
+      </ol>
+    </section>
+  </div>
+  <section class="card" style="background:#0c2538;border:0;color:#dcebfb">
+    <div class="bartitle" style="color:#64b6e8">PORTFOLIO SUMMARY</div>
+    <p style="font-size:13px;line-height:1.72;margin:0;color:#dbe8f5">
+      레거시 Unreal 액션 RPG의 <b style="color:#f0c19c">전투 동기화 문제</b>를 해결하기 위해
+      <span class="mono" style="color:#9fd0f2">UActionComponent</span> 기반 <b style="color:#f0c19c">서버 권위 액션 상태 복제 구조</b>를 설계하고,
+      GameplayTag · DataTable · Unreal Replication · RPC로
+      <b style="color:#e7c2a4">평타 예측 재생 · 장착 아이템 복제 · 현재 액션 태그 복제 · 피격/보스 스킬/사망 부활 동기화</b>를 단계적으로 구현했다.
+      그 결과를 UnrealBuildTool 빌드 · 2인 PIE 런타임 상태 · 별도 프로세스 NULL 테스트 · 날짜별 작업 로그와 코드 경로로 증빙할 수 있다.</p>
+  </section>
+</div></main><footer class="footer"><span>SoulLike Server-Authoritative Action · Technical Document</span><span>15 / 15</span></footer></section></div></body></html>

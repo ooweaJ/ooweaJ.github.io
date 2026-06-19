@@ -225,6 +225,20 @@
     gap: 10px;
     margin: 26px 0 24px;
   }
+  .project-period {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--text-3);
+  }
+  .project-period-featured {
+    margin-bottom: 22px;
+    font-size: 18px;
+  }
+  .project-period-grid {
+    margin-bottom: 12px;
+    font-size: 15px;
+  }
   .project-action {
     display: inline-flex;
     align-items: center;
@@ -931,7 +945,7 @@ function renderFeatured(p) {
         <h3 class="serif font-light leading-[1.05] mb-4" style="font-size: 44px; letter-spacing: -0.025em;">
           ${escapeHtml(p.name)}
         </h3>
-        ${p.subtitle ? `<p class="serif-en italic text-lg mb-6" style="color: var(--text-2);">${escapeHtml(p.subtitle)}</p>` : ''}
+        ${p.period ? `<p class="project-period project-period-featured">${escapeHtml(p.period)}</p>` : ''}
         ${p.concept || p.description ? `<p class="text-base leading-[1.8]" style="color: var(--text-2);">${escapeHtml(p.concept || (p.description || '').slice(0, 160))}</p>` : ''}
         ${linksHtml(p)}
         <div class="flex flex-wrap gap-1.5">${techHtml(p)}</div>
@@ -948,7 +962,7 @@ function renderGridCard(p) {
       <div class="p-5 flex flex-col flex-1">
         <div class="flex flex-wrap gap-1.5 mb-3">${tagsHtml(p)}</div>
         <h3 class="serif font-normal text-xl mb-1">${escapeHtml(p.name)}</h3>
-        ${p.subtitle ? `<p class="serif-en italic text-sm mb-3" style="color: var(--text-3);">${escapeHtml(p.subtitle)}</p>` : ''}
+        ${p.period ? `<p class="project-period project-period-grid">${escapeHtml(p.period)}</p>` : ''}
         ${p.concept || p.description ? `<p class="text-sm leading-[1.7]" style="color: var(--text-2);">${escapeHtml(p.concept || (p.description || '').slice(0, 120))}</p>` : ''}
         ${linksHtml(p)}
       </div>
