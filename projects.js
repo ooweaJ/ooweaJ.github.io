@@ -39,7 +39,7 @@ const PROJECTS = [
     period: '2026.03 ~ 2026.05 ( 2달 )',
     tech: 'Unity, C#, Mirror, KCP, Dedicated Server, Node.js, MySQL',
     thumbnail: 'assets/projects/unity-dedicate/thumbnail.png',
-    video: 'https://youtube.com/',
+    video: 'https://youtu.be/B3zZ_K1uI_8',
     docs: 'assets/projects/unity-dedicate/docs/unity-dedicate-technical-report.html',
     aiCollab: {
       title: 'AI Agent 기반 서버 구조 검토',
