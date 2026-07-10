@@ -13,6 +13,7 @@
      tech        : 기술스택, 쉼표로 구분 — 예: 'UE5, C++' (선택)
      thumbnail   : 썸네일 이미지 URL (선택)
      video       : 영상 링크 (선택)
+     planDocs    : 기획문서 링크 (선택)
      docs        : 기술문서 링크 (선택)
      aiCollab    : AI 협업 패널 데이터 (선택)
      devlog      : 개발일지/Notion 링크 (선택)
@@ -79,6 +80,29 @@ const PROJECTS = [
   },
 
   {
+    id: 'lethe-prototype',
+    name: 'LETHE: 망각의 군주',
+    subtitle: 'Memory-to-Echo Action Roguelite Prototype',
+    concept: '기억을 얻고 강화한 뒤, 보스전 이후 망각된 기억이 무기 잔향과 진화로 남는 2D 액션 로그라이트 프로토타입입니다.',
+    description: 'LETHE는 "강해진 것을 잃는 아쉬움"과 "잃은 것이 다른 형태로 남아 다시 빌드가 되는 쾌감"을 검증하기 위한 2D 액션 로그라이트 프로토타입입니다.\n\nHTML Alpha v0.11/v0.12에서 사냥, 기억 획득/강화, 가중 랜덤 망각, 잔향 누적, 무기 진화 루프를 먼저 구현하고, 이후 Unity Dev_Prototype_v1로 이식하는 흐름을 구성했습니다. HTML 프로토타입은 src/game.js를 중심으로 플레이 루프와 밸런스 검증을 진행했고, Unity 쪽은 ScriptableObject Definition -> Runtime controller/service -> Prefab/VFX/Profile 연결 흐름을 기준으로 구조를 잡았습니다.\n\nUnity 구현에서는 WeaponDefinition, MemoryDefinition, EchoDefinition, UltimateEchoDefinition, EnemyDefinition, EncounterDefinition 같은 데이터 모델을 기준으로 무기 2종, 기억 8종, 잔향 8종, 궁극 잔향 4종, 적/보스/런 루프를 분리하는 방향으로 설계했습니다. 또한 Node.js 기반 AI 플레이어블 테스트와 밸런스/QA 스크립트를 사용해 사람 플레이테스트 전 단계에서 루프와 수치 후보를 빠르게 점검했습니다.',
+    category: 'Unity / Roguelite Prototype',
+    role: 'Game Design / Prototype Developer',
+    period: '2026.06 ~ 2026.07',
+    tech: 'Unity, C#, HTML, JavaScript, Node.js, ScriptableObject, AI Playtest',
+    thumbnail: 'assets/projects/lethe-prototype/thumbnail.png',
+    video: '',
+    planDocs: '',
+    docs: '',
+    devlog: '',
+    github: 'https://github.com/ooweaJ/LETHE_Prototype',
+    featured: false,
+    hasAward: false,
+    award: '',
+    hasHost: false,
+    host: '',
+  },
+
+  {
     id: 'vrbeat',
     name: 'VRBeat',
     subtitle: 'Rhythm Action in Virtual Reality',
@@ -128,6 +152,28 @@ const PROJECTS = [
     },
     devlog: '',
     github: 'https://github.com/ooweaJ/VRBeat',
+    featured: false,
+    hasAward: false,
+    award: '',
+    hasHost: false,
+    host: '',
+  },
+
+  {
+    id: 'mirae-work-ar-manual',
+    name: '미래내일 일경험 - 컴퓨터 조립 가이드',
+    subtitle: 'Computer Assembly Guide AR Manual',
+    concept: '컴퓨터 조립 과정을 AR 환경에서 단계별로 안내하는 메뉴얼 프로젝트입니다.',
+    description: '미래내일 일경험 프로젝트에서 진행한 컴퓨터 조립 가이드 AR 메뉴얼입니다.\n\n사용자가 컴퓨터 부품 조립 순서를 따라갈 수 있도록 AR 기반 안내 흐름을 구성하는 팀 프로젝트입니다. 포트폴리오에는 기업연계 직무경험 과정에서 다룬 AR 콘텐츠 제작 경험과 팀 단위 작업 내용을 중심으로 정리할 예정입니다.',
+    category: 'AR / 기업연계',
+    role: '',
+    period: '',
+    tech: '미래내일 일경험 프로젝트, AR, 팀 프로젝트, 기업연계, 직무경험',
+    thumbnail: 'assets/projects/mirae-work-ar-manual/thumbnail.png',
+    video: '',
+    docs: '',
+    devlog: '',
+    github: '',
     featured: false,
     hasAward: false,
     award: '',

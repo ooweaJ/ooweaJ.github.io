@@ -202,6 +202,83 @@
   }
   .thumb:hover { border-color: var(--accent); }
 
+  .thumb-carousel {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: var(--surface-2);
+  }
+  .thumb-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 360ms ease;
+  }
+  .thumb-slide.active {
+    opacity: 1;
+  }
+  .thumb-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .thumb-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    z-index: 2;
+    border: 1px solid rgba(255,255,255,0.42);
+    border-radius: 50%;
+    background: rgba(26,24,21,0.48);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 180ms ease, background-color 180ms ease;
+  }
+  .thumb:hover .thumb-nav {
+    opacity: 1;
+  }
+  .thumb-nav:hover {
+    background: rgba(26,24,21,0.68);
+  }
+  .thumb-nav svg {
+    width: 15px;
+    height: 15px;
+  }
+  .thumb-nav-prev {
+    left: 10px;
+  }
+  .thumb-nav-next {
+    right: 10px;
+  }
+  .thumb-dots {
+    position: absolute;
+    left: 50%;
+    bottom: 10px;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    gap: 5px;
+    padding: 4px 6px;
+    border-radius: 99px;
+    background: rgba(26,24,21,0.36);
+  }
+  .thumb-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.48);
+  }
+  .thumb-dot.active {
+    background: #fff;
+  }
+
   .link-pill {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 5px 10px;
@@ -386,6 +463,7 @@
     }
     #grid-list { grid-template-columns: 1fr !important; }
     .ai-case-grid { grid-template-columns: 1fr; }
+    .thumb-nav { opacity: 1; }
   }
 
   a { transition: color 200ms ease; }
@@ -655,6 +733,8 @@
     <symbol id="i-doc"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></symbol>
     <symbol id="i-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></symbol>
     <symbol id="i-arr"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol>
     <symbol id="i-github" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49v-1.9c-2.78.62-3.37-1.22-3.37-1.22-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.34 1.12 2.91.85.09-.67.35-1.12.63-1.38-2.22-.26-4.55-1.14-4.55-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.72 0 0 .84-.28 2.75 1.05A9.34 9.34 0 0 1 12 6.92c.85 0 1.7.12 2.5.34 1.9-1.33 2.74-1.05 2.74-1.05.55 1.42.2 2.46.1 2.72.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.8-4.57 5.05.36.32.68.94.68 1.9v2.83c0 .27.18.59.69.49A10.15 10.15 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></symbol>
     <symbol id="i-notion" viewBox="0 0 24 24" fill="currentColor"><path d="M4.1 3.1 17.6 2c1.7-.1 2.2.1 3.3.9l.5.4c.8.6 1.1.9 1.1 1.5v14.3c0 .9-.3 1.5-1.4 1.6L5.4 21.9c-1 .1-1.5 0-2.1-.8l-.7-.9c-.6-.8-.9-1.4-.9-2.1V5.3c0-1.1.5-2 2.4-2.2zm13.8 2.2c.2.4 0 .7-.5.8l-.9.2v9.8c-.8.4-1.5.6-2 .6-.8 0-1-.2-1.6-.9L8 8.2v7.3l1.8.4s0 .8-1.5 1l-4 .2c-.1-.2 0-.6.4-.7l1-.3V6.4l-1.4-.1c-.1-.4.1-.9.8-.9l4.3-.3 5.1 7.8V6.5l-1.5-.2c-.1-.5.3-.8.8-.8l4.1-.2z"/></symbol>
     <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></symbol>
@@ -666,9 +746,14 @@
 
 <div class="max-w-[1100px] mx-auto px-8">
 
+  <div class="mt-4 mb-3 px-4 py-3 text-center text-sm font-semibold"
+       style="color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent-bd); border-radius: 3px;">
+    최신 포트폴리오 확인을 위해 Shift + F5로 새로고침해주세요.
+  </div>
+
   <!-- HEADER -->
-  <header class="flex items-center justify-between py-6 border-b rule">
-    <div class="serif-en text-xl italic" style="color: var(--text);">Yu Jaewoo</div>
+  <header class="relative flex items-center justify-end py-7 border-b rule">
+    <div class="serif-en absolute left-1/2 -translate-x-1/2 text-5xl italic" style="color: var(--text);">Portfolio</div>
     <div class="flex items-center gap-4">
       <a href="#works" class="text-sm font-medium" style="color: var(--text-2);">프로젝트</a>
 <button id="theme-toggle" class="theme-toggle" aria-label="테마 전환" title="테마 전환">
@@ -680,7 +765,7 @@
 
 
   <!-- HERO -->
-  <section id="intro" class="min-h-[calc(100vh-65px)] flex flex-col justify-between pt-16 pb-12">
+  <section id="intro" class="flex flex-col pt-12 pb-14">
 
     <div class="flex items-start justify-between gap-12">
 
@@ -694,8 +779,8 @@
           Game &amp; XR Developer.
         </p>
 
-        <p class="text-xl leading-[1.55] max-w-[480px] mb-10" style="color: var(--text-2);">
-          현실과 가상의 경계에서 — 플레이어가 잊지 못할 경험을 만듭니다.
+        <p class="text-xl leading-[1.55] max-w-[560px] mb-10" style="color: var(--text-2);">
+          Unreal과 Unity로 전투 시스템, AI 행동 설계, XR 인터랙션, 서버 연동 멀티플레이를 다룹니다.
         </p>
 
         <div class="flex flex-wrap gap-2">
@@ -707,26 +792,22 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;flex-shrink:0;"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
             jaewoo0604@gmail.com
           </a>
-          <a href="#" class="link-pill">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;flex-shrink:0;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            Blog
-          </a>
         </div>
       </div>
 
       <div style="flex-shrink:0; width:240px; height:300px; border:1px solid var(--border-2); border-radius:3px; overflow:hidden; background:var(--surface-2); position:relative;">
-        <img src="photo.jpg" alt="Yu Jaewoo"
+        <img src="유재우.jpg" alt="Yu Jaewoo"
              style="width:100%; height:100%; object-fit:cover; object-position:center top;"
              onerror="this.style.display='none'; this.parentElement.querySelector('.ph-label').style.display='flex';">
         <div class="ph-label" style="display:none; position:absolute; inset:0; align-items:center; justify-content:center; flex-direction:column; gap:8px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:32px;height:32px;color:var(--ph);"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7"/></svg>
-          <span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--ph); letter-spacing:0.1em;">photo.jpg</span>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--ph); letter-spacing:0.1em;">유재우.jpg</span>
         </div>
       </div>
 
     </div>
 
-    <div class="border-t rule pt-10">
+    <div class="border-t rule pt-10 mt-14">
 
       <div class="flex items-baseline gap-4 mb-8">
         <span style="font-family:'Cormorant Garamond',serif; font-style:italic; font-size:28px; font-weight:300; color:var(--text-3);">i.</span>
@@ -859,16 +940,16 @@
    Theme toggle
    ============================================================ */
 (function initTheme() {
-  const stored = localStorage.getItem('theme');
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const initial = stored || (prefersDark ? 'dark' : 'light');
+  const themeKey = 'portfolio-theme';
+  const stored = localStorage.getItem(themeKey);
+  const initial = stored === 'dark' || stored === 'light' ? stored : 'light';
   document.documentElement.setAttribute('data-theme', initial);
 
   document.getElementById('theme-toggle').addEventListener('click', () => {
     const cur = document.documentElement.getAttribute('data-theme');
     const next = cur === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
+    localStorage.setItem(themeKey, next);
   });
 })();
 
@@ -903,6 +984,32 @@ function isSafeUrl(u) {
    Rendering
    ============================================================ */
 function thumbHtml(p) {
+  const media = [];
+  if (p.thumbnail && isSafeUrl(p.thumbnail)) media.push(p.thumbnail);
+  if (Array.isArray(p.screenshots)) {
+    p.screenshots.filter(isSafeUrl).forEach(src => {
+      if (!media.includes(src)) media.push(src);
+    });
+  }
+  if (media.length > 1) {
+    return `
+      <div class="thumb-carousel" data-carousel>
+        ${media.map((src, index) => `
+          <div class="thumb-slide${index === 0 ? ' active' : ''}">
+            <img src="${escapeHtml(src)}" alt="${escapeHtml(p.name)} ${index === 0 ? 'thumbnail' : `screenshot ${index}`}" onerror="this.closest('.thumb-slide').remove()">
+          </div>
+        `).join('')}
+        <button type="button" class="thumb-nav thumb-nav-prev" data-carousel-prev aria-label="이전 이미지">
+          <svg><use href="#i-chevron-left"/></svg>
+        </button>
+        <button type="button" class="thumb-nav thumb-nav-next" data-carousel-next aria-label="다음 이미지">
+          <svg><use href="#i-chevron-right"/></svg>
+        </button>
+        <div class="thumb-dots">
+          ${media.map((_, index) => `<span class="thumb-dot${index === 0 ? ' active' : ''}"></span>`).join('')}
+        </div>
+      </div>`;
+  }
   if (p.thumbnail && isSafeUrl(p.thumbnail)) {
     return `<img class="thumb-img" src="${escapeHtml(p.thumbnail)}" alt="${escapeHtml(p.name)}" onerror="this.remove()">`;
   }
@@ -927,6 +1034,7 @@ function techHtml(p) {
 function linksHtml(p) {
   const items = [];
   if (isSafeUrl(p.video))  items.push(`<a href="${escapeHtml(p.video)}"  target="_blank" rel="noopener" class="project-action project-action-primary"><svg><use href="#i-youtube"/></svg> 플레이 영상</a>`);
+  if (isSafeUrl(p.planDocs)) items.push(`<a href="${escapeHtml(p.planDocs)}" target="_blank" rel="noopener" class="project-action"><svg><use href="#i-doc"/></svg> 기획문서</a>`);
   if (isSafeUrl(p.docs))   items.push(`<a href="${escapeHtml(p.docs)}"   target="_blank" rel="noopener" class="project-action"><svg><use href="#i-doc"/></svg> 기술문서</a>`);
   if (p.aiCollab) items.push(`<button type="button" class="project-action" data-ai-id="${escapeHtml(p.id)}"><svg><use href="#i-code"/></svg> AI 협업</button>`);
   if (isSafeUrl(p.devlog || p.notion)) items.push(`<a href="${escapeHtml(p.devlog || p.notion)}" target="_blank" rel="noopener" class="project-action"><svg><use href="#i-notion"/></svg> 개발일지</a>`);
@@ -976,8 +1084,52 @@ function render() {
   document.getElementById('grid-list').innerHTML     = grid.map(renderGridCard).join('');
 }
 
+function initCarousels() {
+  document.querySelectorAll('[data-carousel]').forEach(carousel => {
+    const slides = Array.from(carousel.querySelectorAll('.thumb-slide'));
+    const dots = Array.from(carousel.querySelectorAll('.thumb-dot'));
+    const prev = carousel.querySelector('[data-carousel-prev]');
+    const next = carousel.querySelector('[data-carousel-next]');
+    if (slides.length < 2) return;
+
+    let current = 0;
+    let timer = null;
+
+    const show = index => {
+      current = (index + slides.length) % slides.length;
+      slides.forEach((slide, slideIndex) => slide.classList.toggle('active', slideIndex === current));
+      dots.forEach((dot, dotIndex) => dot.classList.toggle('active', dotIndex === current));
+    };
+    const start = () => {
+      timer = window.setInterval(() => show(current + 1), 4500);
+    };
+    const reset = () => {
+      if (timer) window.clearInterval(timer);
+      start();
+    };
+
+    prev.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      show(current - 1);
+      reset();
+    });
+    next.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      show(current + 1);
+      reset();
+    });
+    carousel.addEventListener('mouseenter', () => {
+      if (timer) window.clearInterval(timer);
+    });
+    carousel.addEventListener('mouseleave', reset);
+    start();
+  });
+}
 
 render();
+initCarousels();
 
 function aiCaseHtml(aiCase) {
   return `
