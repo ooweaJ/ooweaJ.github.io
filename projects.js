@@ -170,7 +170,7 @@ const PROJECTS = [
     period: '',
     tech: '미래내일 일경험 프로젝트, AR, 팀 프로젝트, 기업연계, 직무경험',
     thumbnail: 'assets/projects/mirae-work-ar-manual/thumbnail.png',
-    video: '',
+    video: 'https://youtu.be/OQqdCbL1nRc',
     docs: '',
     devlog: '',
     github: '',
