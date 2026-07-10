@@ -90,6 +90,10 @@ const PROJECTS = [
     period: '2026.06 ~ 2026.07',
     tech: 'Unity, C#, HTML, JavaScript, Node.js, ScriptableObject, AI Playtest',
     thumbnail: 'assets/projects/lethe-prototype/thumbnail.png',
+    screenshots: [
+      'assets/projects/lethe-prototype/screenshots/1.png',
+      'assets/projects/lethe-prototype/screenshots/2.png',
+    ],
     video: '',
     planDocs: '',
     docs: '',
